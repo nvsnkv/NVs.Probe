@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NVs.Probe.Experiments;
 using Serilog;
 using Serilog.Events;
 
@@ -32,7 +33,11 @@ namespace NVs.Probe
         private static IHost BuildHost(string[] args)
         {
             return new HostBuilder()
-                .ConfigureServices(s => s.AddSingleton<IHostedService>(new Payload()))
+                .ConfigureServices(s =>
+                {
+                    s.AddSingleton<IHostedService>(new Payload());
+                    s.AddSingleton<IExperimenter>();
+                })
                 .UseSerilog()
                 .Build();
         }
