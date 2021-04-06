@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NVs.Probe.Setup;
 using Serilog;
 using Serilog.Events;
 
@@ -38,7 +39,7 @@ namespace NVs.Probe
             return new HostBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddSingleton<IHostedService>(s => new Payload(s.GetService<ILogger<Payload>>()));
+                    services.AddSingleton<IHostedService>(s => new Payload(new MetricConfigBuilder(args).Build(), s.GetService<ILogger<Payload>>())));
 
                 })
                 .UseSerilog()

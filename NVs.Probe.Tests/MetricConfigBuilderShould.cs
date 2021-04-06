@@ -15,7 +15,7 @@ namespace NVs.Probe.Tests
             var topics = new[] { "topic1", "topic2", "topic3" };
             var commands = new[] { "command1", "command2", "command3" };
 
-            IEnumerable<string> getArgs()
+            IEnumerable<string> GetArgs()
             {
                 for (var i = 0; i < topics.Length; i++)
                 {
@@ -24,7 +24,7 @@ namespace NVs.Probe.Tests
                 }
             }
 
-            var configs = new MetricConfigBuilder(getArgs()).Build().ToList();
+            var configs = new MetricConfigBuilder(GetArgs()).Build().ToList();
 
             configs.Should().HaveCount(topics.Length);
             for (var i = 0; i < topics.Length; i++)
