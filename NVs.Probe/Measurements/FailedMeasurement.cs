@@ -1,6 +1,7 @@
 ﻿using System;
+using NVs.Probe.Metrics;
 
-namespace NVs.Probe.Metrics
+namespace NVs.Probe.Measurements
 {
     sealed class FailedMeasurement : Measurement
     {

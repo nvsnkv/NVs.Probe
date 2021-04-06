@@ -39,8 +39,7 @@ namespace NVs.Probe
             return new HostBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddSingleton<IHostedService>(s => new Payload(new MetricConfigBuilder(args).Build(), s.GetService<ILogger<Payload>>())));
-
+                    services.AddSingleton<IHostedService>(s => new Payload(new MetricConfigBuilder(args).Build(), null, null, s.GetService<ILogger<Payload>>()));
                 })
                 .UseSerilog()
                 .Build();
