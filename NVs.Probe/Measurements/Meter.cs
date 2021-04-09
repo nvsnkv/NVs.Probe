@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -9,18 +10,11 @@ namespace NVs.Probe.Measurements
 {
     sealed class Meter : IMeter
     {
-        private readonly string shell;
         private readonly TimeSpan commandTimeout;
         private readonly ILogger<Meter> logger;
 
-        public Meter(string shell, TimeSpan commandTimeout, ILogger<Meter> logger)
+        public Meter(TimeSpan commandTimeout, ILogger<Meter> logger)
         {
-            if (string.IsNullOrWhiteSpace(shell))
-            {
-                throw new ArgumentException($"\"{nameof(shell)}\" should not be null or consists only of white-space characters!", nameof(shell));
-            }
-
-            this.shell = shell;
             this.commandTimeout = commandTimeout;
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -29,38 +23,52 @@ namespace NVs.Probe.Measurements
         {
             if (config is null) throw new ArgumentNullException(nameof(config));
             logger.LogInformation($"Capturing new measurement for{config.Metric.Topic} ...");
-            
-            var process  = new Process();
-            process.StartInfo = new ProcessStartInfo() 
+
+            var (filename, args) = ParseCommand(config.Command);
+
+            var process = new Process
             {
-                FileName = shell,
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true,
-                UseShellExecute = false
+                StartInfo = new ProcessStartInfo()
+                {
+                    FileName = filename,
+                    Arguments = args,
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                }
             };
 
-            try 
+            try
             {
                 ct.ThrowIfCancellationRequested();
-                
+
                 if (!process.Start())
                     throw new InvalidOperationException("Failed to start process!");
 
                 logger.LogInformation($"Process {process.Id} started.");
-                await process.StandardInput.WriteLineAsync(config.Command);
-                await process.StandardInput.FlushAsync();
-                process.StandardInput.Close();
-                logger.LogInformation("Command sent.");
 
                 ct.ThrowIfCancellationRequested();
 
                 if (!process.WaitForExit((int)commandTimeout.TotalMilliseconds))
                     throw new InvalidOperationException($"Process did not exited in {commandTimeout}");
 
-               throw new NotImplementedException();
+                logger.LogInformation("Process stopped.");
+                var result = await process.StandardOutput.ReadLineAsync();
 
+                if (process.ExitCode != 0)
+                {
+                    var stdErr = await process.StandardError.ReadToEndAsync();
+                    if (string.IsNullOrEmpty(stdErr))
+                    {
+                        stdErr = await process.StandardOutput.ReadToEndAsync();
+                    }
+
+                    throw new InvalidOperationException($"Exit code: {process.ExitCode}{Environment.NewLine}Output: {result}{Environment.NewLine}  Error: {stdErr}");
+                }
+
+                return new SuccessfulMeasurement(config.Metric, result);
             }
             catch (Exception e)
             {
@@ -71,6 +79,30 @@ namespace NVs.Probe.Measurements
             {
                 process.Dispose();
             }
+        }
+
+        private Tuple<string, string> ParseCommand(string command)
+        {
+            var i = 0;
+            if ("'\"".Contains(command[i]))
+            {
+                i = command.IndexOf(command[i], 1);
+                if (i < 0)
+                {
+                    throw new ArgumentException("Failed to parse the command - unable to identify path to executable!")
+                    {
+                        Data = { { "Command", command } }
+                    };
+                }
+            }
+            else
+            {
+                i = command.IndexOf(' ');
+            }
+
+            return i < 0 
+                ? new Tuple<string, string>(command, string.Empty) 
+                : new Tuple<string, string>(command.Substring(0, i), command[i..]);
         }
     }
 }
