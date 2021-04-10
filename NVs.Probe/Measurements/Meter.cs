@@ -8,7 +8,7 @@ using NVs.Probe.Metrics;
 
 namespace NVs.Probe.Measurements
 {
-    sealed class Meter : IMeter
+    internal sealed class Meter : IMeter
     {
         private readonly TimeSpan commandTimeout;
         private readonly ILogger<Meter> logger;

@@ -12,9 +12,9 @@ using Serilog.Events;
 
 namespace NVs.Probe
 {
-    static class Program
+    internal static class Program
     {
-        static int Main(string[] args)
+        private static int Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
@@ -40,7 +40,12 @@ namespace NVs.Probe
             return new HostBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddSingleton<IHostedService>(s => new Payload(new MetricConfigBuilder(args).Build(), null, null, s.GetService<ILogger<Payload>>()));
+                    services.AddSingleton<IHostedService>(s => new Payload(
+                        new MetricConfigBuilder(args).Build(), 
+                        TimeSpan.FromMinutes(1), 
+                        null, 
+                        null, 
+                        s.GetService<ILogger<Payload>>()));
                 })
                 .UseSerilog()
                 .Build();

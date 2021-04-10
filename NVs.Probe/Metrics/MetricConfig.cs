@@ -2,7 +2,7 @@
 
 namespace NVs.Probe.Metrics
 {
-    sealed class MetricConfig
+    internal sealed class MetricConfig
     {
         public MetricConfig(Metric metric, string command)
         {

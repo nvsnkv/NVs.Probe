@@ -5,24 +5,27 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NVs.Probe.Logging;
 using NVs.Probe.Measurements;
 using NVs.Probe.Metrics;
 using NVs.Probe.Mqtt;
 
 namespace NVs.Probe
 {
-    sealed class Payload : IHostedService
+    internal sealed class Payload : IHostedService
     {
         private readonly IList<MetricConfig> configs;
+        private readonly TimeSpan delay;
         private readonly IMeter meter;
         private readonly IMqttAdapter adapter;
         private readonly ILogger<Payload> logger;
 
         private CancellationTokenSource source;
 
-        public Payload(IEnumerable<MetricConfig> configs, IMeter meter, IMqttAdapter adapter, ILogger<Payload> logger)
+        public Payload(IEnumerable<MetricConfig> configs, TimeSpan delay, IMeter meter, IMqttAdapter adapter, ILogger<Payload> logger)
         {
             this.configs = configs?.ToList() ?? throw new ArgumentNullException(nameof(configs));
+            this.delay = delay;
             this.meter = meter ?? throw new ArgumentNullException(nameof(meter));
             this.adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -37,40 +40,50 @@ namespace NVs.Probe
                 await adapter.Announce(configs, cancellationToken);
 
                 source = new CancellationTokenSource();
-                var _ = Task.Factory.StartNew(async() => {
-                    while (!source.IsCancellationRequested) 
+                var _ = Task.Factory.StartNew(async () =>
+                {
+                    using (logger.BeginScope("Measurement cycle"))
                     {
-                        logger.LogInformation("Measurement series started.");
-
-                        foreach(var config in configs) 
+                        while (!source.IsCancellationRequested)
                         {
-                            var result = await meter.Measure(config, source.Token);
-                            if (source.IsCancellationRequested) break;
+                            logger.LogInformation("Measurement series started.");
 
-                            switch(result) 
+                            foreach (var config in configs)
                             {
-                                case null:
-                                    throw new ArgumentNullException(nameof(result));
+                                using (logger.BeginScope(config.ToLogProperties()))
+                                {
+                                    var result = await meter.Measure(config, source.Token);
+                                    if (source.IsCancellationRequested) break;
 
-                                case SuccessfulMeasurement successful:
-                                    await adapter.Notify(successful, source.Token);
-                                break;
-                                
-                                case FailedMeasurement failure:
-                                    throw new NotImplementedException("TODO: implement error notification");
-                                
-                                default:
-                                    throw new NotSupportedException($"Unkwnown measurement {result.GetType().Name} type received!");
+                                    switch (result)
+                                    {
+                                        case null:
+                                            throw new ArgumentNullException(nameof(result));
+
+                                        case SuccessfulMeasurement successful:
+                                            await adapter.Notify(successful, source.Token);
+                                            break;
+
+                                        case FailedMeasurement failure:
+                                            logger.LogError(failure.Exception, $"Failed to measure {failure.Metric.Topic}");
+                                            break;
+
+                                        default:
+                                            throw new NotSupportedException(
+                                                $"Unknown measurement {result.GetType().Name} type received!");
+                                    }
+
+                                    if (source.IsCancellationRequested) break;
+
+                                    logger.LogInformation("Measurement series completed.");
+                                }
                             }
 
-                            if (source.IsCancellationRequested) break;
+                            await Task.Delay(delay, source.Token);
                         }
 
-                        logger.LogInformation("Measurement series completed.");
-                        await Task.Delay(TimeSpan.FromMinutes(1), source.Token);
+                        logger.LogInformation("Measurement loop stopped.");
                     }
-
-                    logger.LogInformation("Measurement loop cancelled");
                 }, cancellationToken);
             }
             catch (Exception e)
@@ -82,13 +95,14 @@ namespace NVs.Probe
             logger.LogInformation("Service started.");
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
             logger.LogInformation("Stopping service... ");
             try
             {
                 source.Cancel();
                 source.Dispose();
+                await adapter.Stop(cancellationToken);
             }
             catch (Exception e)
             {
@@ -96,8 +110,7 @@ namespace NVs.Probe
                 throw;
             }
 
-            logger.LogInformation("Service started.");
-            return Task.CompletedTask;
+            logger.LogInformation("Service stopped.");
         }
     }
 }

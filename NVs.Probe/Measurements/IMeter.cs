@@ -4,7 +4,7 @@ using NVs.Probe.Metrics;
 
 namespace NVs.Probe.Measurements
 {
-    interface IMeter {
+    internal interface IMeter {
         Task<Measurement> Measure(MetricConfig config, CancellationToken ct);
     }
 }

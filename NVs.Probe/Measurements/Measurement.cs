@@ -3,7 +3,7 @@ using NVs.Probe.Metrics;
 
 namespace NVs.Probe.Measurements
 {
-    abstract class Measurement
+    internal abstract class Measurement
     {
         protected Measurement(Metric metric)
         {

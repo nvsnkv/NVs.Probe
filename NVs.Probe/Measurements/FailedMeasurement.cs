@@ -3,7 +3,7 @@ using NVs.Probe.Metrics;
 
 namespace NVs.Probe.Measurements
 {
-    sealed class FailedMeasurement : Measurement
+    internal sealed class FailedMeasurement : Measurement
     {
         public FailedMeasurement(Metric metric, Exception exception) : base(metric)
         {
