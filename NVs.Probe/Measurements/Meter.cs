@@ -22,7 +22,7 @@ namespace NVs.Probe.Measurements
         public async Task<Measurement> Measure(MetricConfig config, CancellationToken ct)
         {
             if (config is null) throw new ArgumentNullException(nameof(config));
-            logger.LogInformation($"Capturing new measurement for{config.Metric.Topic} ...");
+            logger.LogDebug($"Capturing new measurement for{config.Metric.Topic} ...");
 
             var (filename, args) = ParseCommand(config.Command);
 
@@ -47,14 +47,14 @@ namespace NVs.Probe.Measurements
                 if (!process.Start())
                     throw new InvalidOperationException("Failed to start process!");
 
-                logger.LogInformation($"Process {process.Id} started.");
+                logger.LogDebug($"Process {process.Id} started.");
 
                 ct.ThrowIfCancellationRequested();
 
                 if (!process.WaitForExit((int)commandTimeout.TotalMilliseconds))
                     throw new InvalidOperationException($"Process did not exited in {commandTimeout}");
 
-                logger.LogInformation("Process stopped.");
+                logger.LogDebug("Process stopped.");
                 var result = await process.StandardOutput.ReadToEndAsync();
                 result = result.TrimEnd();
 
@@ -69,6 +69,7 @@ namespace NVs.Probe.Measurements
                     throw new InvalidOperationException($"Exit code: {process.ExitCode}{Environment.NewLine}Output: {result}{Environment.NewLine}  Error: {stdErr}");
                 }
 
+                logger.LogDebug("Measurement completed.");
                 return new SuccessfulMeasurement(config.Metric, result);
             }
             catch (Exception e)
