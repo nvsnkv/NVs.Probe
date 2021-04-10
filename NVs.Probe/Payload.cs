@@ -33,7 +33,7 @@ namespace NVs.Probe
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            logger.LogInformation("Starting service... ");
+            logger.LogDebug("Starting service... ");
             try
             {
                 await adapter.Start(cancellationToken);
@@ -46,7 +46,7 @@ namespace NVs.Probe
                     {
                         while (!source.IsCancellationRequested)
                         {
-                            logger.LogInformation("Measurement series started.");
+                            logger.LogDebug("Measurement series started.");
 
                             foreach (var config in configs)
                             {
@@ -75,14 +75,14 @@ namespace NVs.Probe
 
                                     if (source.IsCancellationRequested) break;
 
-                                    logger.LogInformation("Measurement series completed.");
+                                    logger.LogDebug("Measurement series completed.");
                                 }
                             }
 
                             await Task.Delay(delay, source.Token);
                         }
 
-                        logger.LogInformation("Measurement loop stopped.");
+                        logger.LogInformation("Measurement cycle stopped.");
                     }
                 }, cancellationToken);
             }
@@ -97,7 +97,7 @@ namespace NVs.Probe
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            logger.LogInformation("Stopping service... ");
+            logger.LogDebug("Stopping service... ");
             try
             {
                 source.Cancel();
