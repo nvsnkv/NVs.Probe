@@ -55,7 +55,8 @@ namespace NVs.Probe.Measurements
                     throw new InvalidOperationException($"Process did not exited in {commandTimeout}");
 
                 logger.LogInformation("Process stopped.");
-                var result = await process.StandardOutput.ReadLineAsync();
+                var result = await process.StandardOutput.ReadToEndAsync();
+                result = result.TrimEnd();
 
                 if (process.ExitCode != 0)
                 {
