@@ -22,7 +22,7 @@ namespace NVs.Probe.Tests
         {
             var config = new MetricConfig(new Metric("dotnet/version"), "dotnet --version");
 
-            var meter = new Meter(TimeSpan.FromMilliseconds(100), logger.Object);
+            var meter = new Meter(TimeSpan.FromMilliseconds(300), logger.Object);
             var result = await meter.Measure(config, CancellationToken.None);
 
             result.Should().BeOfType<SuccessfulMeasurement>();

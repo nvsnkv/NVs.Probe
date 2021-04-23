@@ -23,7 +23,7 @@ namespace NVs.Probe.Setup
                 (Options o) => o,
                 (IEnumerable<Error> errs) => throw new ArgumentException("Failed to parse arguments!")
                 {
-                    Data = { {"Errors", errs} }
+                    Data = { {"Errors", errs.ToList() } }
                 }
             );
 
