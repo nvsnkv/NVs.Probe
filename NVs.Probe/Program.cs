@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -37,12 +38,14 @@ namespace NVs.Probe
 
         private static IHost BuildHost(string[] args)
         {
+            var (options, configs) = new ArgsParser().Parse(args);
+
             return new HostBuilder()
                 .ConfigureServices(services =>
                 {
                     services.AddSingleton<IHostedService>(s => new Payload(
-                        new MetricConfigBuilder(args).Build(), 
-                        TimeSpan.FromMinutes(1), 
+                        configs, 
+                        TimeSpan.FromMilliseconds(options.SeriesInterval), 
                         null, 
                         null, 
                         s.GetService<ILogger<Payload>>()));
