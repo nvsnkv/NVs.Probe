@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NVs.Probe.Measurements;
 using NVs.Probe.Metrics;
-using Serilog;
 using Xunit;
 
 namespace NVs.Probe.Tests

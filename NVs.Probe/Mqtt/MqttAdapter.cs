@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
-using MQTTnet.Implementations;
 using NVs.Probe.Measurements;
 using NVs.Probe.Metrics;
-using Serilog;
 
 namespace NVs.Probe.Mqtt
 {

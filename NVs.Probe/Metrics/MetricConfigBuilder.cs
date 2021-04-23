@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using NVs.Probe.Metrics;
 
-namespace NVs.Probe.Setup
+namespace NVs.Probe.Metrics
 {
     internal sealed class MetricConfigBuilder
     {

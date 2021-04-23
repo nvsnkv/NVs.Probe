@@ -1,8 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
-using NVs.Probe.Setup;
+using NVs.Probe.Metrics;
 using Xunit;
 
 namespace NVs.Probe.Tests
