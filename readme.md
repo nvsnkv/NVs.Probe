@@ -45,3 +45,5 @@ dotnet run probe.dll -c probe -s 127.0.0.1 -u Vasya -p "no idea!" -- \
                                         pairs, like 'dotnet/version' 'dotnet --
                                         version'
 ```
+## Logging
+Applicaion uses [Serilog](https://serilog.net/) to produce logs. Logging configuration is set up in `appsettings.json` file.
