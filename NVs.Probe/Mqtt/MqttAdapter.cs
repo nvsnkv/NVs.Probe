@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
+using NVs.Probe.Logging;
 using NVs.Probe.Measurements;
 using NVs.Probe.Metrics;
 
@@ -41,11 +43,11 @@ namespace NVs.Probe.Mqtt
 
             if (arg.Exception != null)
             {
-                logger.LogError(arg.Exception, "Client got disconnected from the server due to following reason: {reason}", arg.Reason);
+                logger.LogError(arg.Exception, "Client got disconnected from the server due to following reason: {@reason}", arg.Reason);
             }
             else
             {
-                logger.LogInformation("Client got disconnected from the server due to following reason: {reason}", arg.Reason);
+                logger.LogInformation("Client got disconnected from the server due to following reason: {@reason}", arg.Reason);
             }
 
             if (arg.Reason != MqttClientDisconnectReason.NormalDisconnection)
@@ -62,7 +64,7 @@ namespace NVs.Probe.Mqtt
                     }
                     else
                     {
-                        logger.LogWarning("Maximum retry attempts count reached, connection won't be restored automatically!");
+                        logger.LogError("Maximum retry attempts count reached, connection won't be restored automatically!");
                     }
                 }
                 else
@@ -77,9 +79,34 @@ namespace NVs.Probe.Mqtt
             throw new NotImplementedException();
         }
 
-        public Task Notify(SuccessfulMeasurement measurement, CancellationToken ct)
+        public async Task Notify(SuccessfulMeasurement measurement, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            if (measurement == null) throw new ArgumentNullException(nameof(measurement));
+            using (logger.WithTopic(measurement.Metric))
+            {
+                logger.LogDebug("Notifying broker about successful measurement ...");
+                if (!client.IsConnected)
+                {
+                    logger.LogWarning("Client is not connected, message will not be published!");
+                }
+
+                var message = new MqttApplicationMessageBuilder()
+                    .WithTopic($"{options.ClientId}/{measurement.Metric.Topic}")
+                    .WithPayload(measurement.Result)
+                    .Build();
+
+                try
+                {
+                    await client.PublishAsync(message, ct);
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "Failed to publish message!");
+                    throw;
+                }
+
+                logger.LogDebug("Notification sent!");
+            }
         }
 
         public async Task Start(CancellationToken ct)
