@@ -3,7 +3,7 @@ A simple .net core app that collects and publishes metrics to MQTT server.
 ## Usage
 ```
 #!/bin/sh
-dotnet run probe.dll -ñ probe -s 127.0.0.1 -u Vasya -p "no idea!" -- \
+dotnet run probe.dll -c probe -s 127.0.0.1 -u Vasya -p "no idea!" -- \
   "cpu_load" "cat /proc/loadavg | awk '{print $1}'" \
   "mem" "cat /proc/meminfo | grep MemFree | awk '{print $2}'"
 ```
