@@ -7,7 +7,7 @@ dotnet run probe.dll -c probe -s 127.0.0.1 -u Vasya -p "no idea!" -- \
   "cpu_load" "cat /proc/loadavg | awk '{print $1}'" \
   "mem" "cat /proc/meminfo | grep MemFree | awk '{print $2}'"
 ```
-## Help
+### Options
 `dotnet run probe.dll --help` will list available configuration options:
 ```
   -c, --mqtt-client-id                  Required. MQTT Client Identifier
