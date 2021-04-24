@@ -50,7 +50,7 @@ namespace NVs.Probe.Host
         [Option("measurement-series-interval", HelpText = "Base interval between measurement series", Default = (ulong)120000)]
         public ulong MeasurementSeriesInterval { get; }
 
-        [Value(0, MetaName = "Measurement configuration -  a series of topic-command pairs, like 'dotnet/version' 'dotnet -- version'", Required = true)]
+        [Value(0, MetaName = "Measurements configuration", HelpText = "A series of topic-command pairs, like 'dotnet/version' 'dotnet -- version'", Required = true)]
         public IEnumerable<string> MeasurementArguments { get; }
 
         public IMqttClientOptions GetMqttOptions(MqttClientOptionsBuilder builder)

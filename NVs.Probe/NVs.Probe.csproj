@@ -7,6 +7,9 @@
     <Version>0.0.1</Version>
     <Copyright>(c) nvsnkv 2021</Copyright>
     <Authors>nvsnkv</Authors>
+    <Description>Probe is a simple application designed to capture various system stats that can be captured via CLI and publish them to MQTT broker.</Description>
+    <RepositoryUrl>https://github.com/nvsnkv/NVs.Probe</RepositoryUrl>
+    <PackageTags>probe telemetry statistics</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
