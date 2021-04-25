@@ -1,5 +1,6 @@
 # Probe
-A simple .net core app that collects and publishes metrics to MQTT server.
+A simple .net core app that collects and publishes command line based metrics to MQTT server.
+Application supports 
 ## Usage
 ```
 #!/bin/sh
@@ -46,4 +47,10 @@ dotnet run probe.dll -c probe -s 127.0.0.1 -u Vasya -p "no idea!" -- \
                                         version'
 ```
 ## Logging
-Applicaion uses [Serilog](https://serilog.net/) to produce logs. Logging configuration is set up in `appsettings.json` file.
+Applicaion uses [Serilog](https://serilog.net/) to produce logs. Logging configuration is set up in `probe.settings.json` file.
+
+## Building and deployment
+Publish profiles in NVs.Probe project (`.\NVs.Probe\Properties\PublishProfiles`) allows to create single-file executables for windows (x64) and linux (arm).
+Both profiles publishes application to `.\publish` folder.
+
+Application is runtime-agnostic by itself, so application can be compiled for any runtime supported by .Net Core currently

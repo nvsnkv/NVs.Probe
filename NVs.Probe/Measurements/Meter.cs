@@ -49,9 +49,9 @@ namespace NVs.Probe.Measurements
                     if (!process.Start())
                         throw new InvalidOperationException("Failed to start process!");
 
-                    using (logger.BeginScope("ProcessId", process.Id))
+                    using (logger.BeginScope("ProcessId {@ProcessId}", process.Id))
                     {
-                        logger.LogDebug($"Process {process.Id} started.");
+                        logger.LogDebug($"Process started.");
 
                         ct.ThrowIfCancellationRequested();
 

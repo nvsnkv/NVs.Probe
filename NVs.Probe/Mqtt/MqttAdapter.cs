@@ -54,7 +54,7 @@ namespace NVs.Probe.Mqtt
                 logger.LogInformation("Client got disconnected from the server due to following reason: {@reason}", arg.Reason);
             }
 
-            if (arg.Reason != MqttClientDisconnectReason.NormalDisconnection)
+            if (arg.Reason != MqttClientDisconnectReason.NormalDisconnection || arg.Exception != null)
             {
                 if (retryOptions.ShouldRetry)
                 {
@@ -62,7 +62,7 @@ namespace NVs.Probe.Mqtt
                     if (retriesCount < retryOptions.RetriesCount)
                     {
                         var delay = retryOptions.Interval * retriesCount;
-                        logger.LogInformation($"Attempting to reconnect in {delay} ({retriesCount} out of {retryOptions.RetriesCount}");
+                        logger.LogInformation($"Attempting to reconnect in {delay} ({retriesCount} out of {retryOptions.RetriesCount})");
                         await Task.Delay(delay, internalCancellationTokenSource.Token);
                         await Connect(internalCancellationTokenSource.Token);
                     }
@@ -96,7 +96,7 @@ namespace NVs.Probe.Mqtt
                 var i = 1;
                 foreach (var message in messages)
                 {
-                    using (logger.BeginScope("Topic", message.Topic))
+                    using (logger.BeginScope("Topic {@Topic}", message.Topic))
                     {
                         logger.LogDebug($"Sending message {i++} out of {messages.Count}");
                         await client.PublishAsync(message, ct);
@@ -114,37 +114,7 @@ namespace NVs.Probe.Mqtt
 
             logger.LogInformation("Announcement completed!");
         }
-
-        private (string, string, string) GetAssemblyMetadata()
-        {
-            string name = null, author = null, version = null;
-
-            var assembly = Assembly.GetEntryAssembly();
-            if (assembly != null)
-            {
-                foreach (var attribute in assembly.GetCustomAttributes())
-                {
-                    switch (attribute)
-                    {
-                        case AssemblyCompanyAttribute c:
-                            author = c.Company;
-                            break;
-
-                        case AssemblyVersionAttribute v:
-                            version = v.Version;
-                            break;
-
-                        case AssemblyTitleAttribute t:
-                            name = t.Title;
-                            break;
-                    }
-                }
-
-            }
-
-            return (name, author, version);
-        }
-
+        
         public async Task Notify(SuccessfulMeasurement measurement, CancellationToken ct)
         {
             if (measurement == null) throw new ArgumentNullException(nameof(measurement));
@@ -158,7 +128,7 @@ namespace NVs.Probe.Mqtt
                 }
 
                 var message = new MqttApplicationMessageBuilder()
-                    .WithTopic($"{options.ClientId}/{measurement.Metric.Topic}")
+                    .WithTopic($"{measurement.Metric.Topic}")
                     .WithPayload(measurement.Result)
                     .Build();
 
@@ -190,7 +160,16 @@ namespace NVs.Probe.Mqtt
                 return;
             }
 
-            await Connect(ct);
+            try
+            {
+                await Connect(ct);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Failed to connect to MQTT broker!");
+                throw;
+            }
+
             logger.LogInformation("Adapter started.");
         }
 

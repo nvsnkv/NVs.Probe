@@ -30,7 +30,7 @@ namespace NVs.Probe.Mqtt
             var metadata = GetAssemblyMetadata();
             var device = new
             {
-                identifiers = new[] { $"id_{options.ClientId}_device" },
+                identifiers = new[] { $"id_{options.ClientId}_probe_device" },
                 name = $"Probe ({options.ClientId})",
                 sw_version = metadata.Version,
                 model = metadata.Name,
@@ -51,18 +51,18 @@ namespace NVs.Probe.Mqtt
             {
                 try
                 {
-                    var uniqueId = $"{options.ClientId}_{config.Metric.Topic.Replace('/', '_')}";
-                    using (logger.BeginScope("UniqueId", uniqueId))
+                    var uniqueId = $"probe_{options.ClientId}_{config.Metric.Topic.Replace('/', '_')}";
+                    using (logger.BeginScope($"UniqueId: {uniqueId}"))
                     {
                         var payload = new
                         {
-                            topic = config.Metric.Topic,
+                            state_topic = config.Metric.Topic,
                             name = config.Metric.Topic.Split('/').Last(),
-                            uniqueId,
+                            unique_id = uniqueId,
                             device
                         };
                         var message = new MqttApplicationMessageBuilder()
-                            .WithTopic($"homeassistant/sensor/{uniqueId}/config")
+                            .WithTopic($"homeassistant/sensor/probe/{uniqueId}/config")
                             .WithPayload(JsonConvert.SerializeObject(payload))
                             .Build();
 
@@ -99,9 +99,15 @@ namespace NVs.Probe.Mqtt
                 }
             }
 
+            if (version is null)
+            {
+                logger.LogWarning("AssemblyVersion attribute was not properly populated!");
+                version = assembly.GetName().Version?.ToString();
+            }
+
             if (name is null) { logger.LogWarning("AssemblyTitle attribute was not properly populated!"); }
             if (author is null) { logger.LogWarning("AssemblyCompany attribute was not properly populated!"); }
-            if (version is null) { logger.LogWarning("AssemblyVersion attribute was not properly populated!"); }
+            if (version is null) { logger.LogWarning("Version was not recognized!"); }
 
             return new Metadata(name, author, version);
         }

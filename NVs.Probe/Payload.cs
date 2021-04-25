@@ -50,7 +50,7 @@ namespace NVs.Probe
 
                             foreach (var config in configs)
                             {
-                                using (logger.BeginScope(config.ToLogProperties()))
+                                using (logger.BeginScope("Config: {@config}", config))
                                 {
                                     var result = await meter.Measure(config, source.Token);
                                     if (source.IsCancellationRequested) break;
