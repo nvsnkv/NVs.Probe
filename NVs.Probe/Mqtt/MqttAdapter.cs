@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -18,16 +20,18 @@ namespace NVs.Probe.Mqtt
         private readonly CancellationTokenSource internalCancellationTokenSource = new CancellationTokenSource();
         private readonly IMqttClientOptions options;
         private readonly RetryOptions retryOptions;
+        private readonly IMqttAnnounceBuilder announceBuilder;
         private readonly ILogger<MqttAdapter> logger;
         private readonly IMqttClient client;
 
         private uint retriesCount = 0;
 
-        public MqttAdapter(IMqttClientOptions options, IMqttClientFactory factory, RetryOptions retryOptions, ILogger<MqttAdapter> logger)
+        public MqttAdapter(IMqttClientOptions options, IMqttClientFactory factory, RetryOptions retryOptions, IMqttAnnounceBuilder announceBuilder, ILogger<MqttAdapter> logger)
         {
             if (factory == null) throw new ArgumentNullException(nameof(factory));
             this.options = options ?? throw new ArgumentNullException(nameof(options));
             this.retryOptions = retryOptions ?? throw new ArgumentNullException(nameof(retryOptions));
+            this.announceBuilder = announceBuilder ?? throw new ArgumentNullException(nameof(announceBuilder));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             client = factory.CreateMqttClient();
             client.UseDisconnectedHandler(HandleClientDisconnected);
@@ -74,9 +78,71 @@ namespace NVs.Probe.Mqtt
             }
         }
 
-        public Task Announce(IEnumerable<MetricConfig> configs, CancellationToken ct)
+        public async Task Announce(IEnumerable<MetricConfig> configs, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            if (configs == null) throw new ArgumentNullException(nameof(configs));
+            logger.LogDebug("Announcement started... ");
+
+            if (!client.IsConnected)
+            {
+                logger.LogWarning("Client is not connected to broker, no announcement will happen!");
+                return;
+            }
+
+            var messages = announceBuilder.BuildAnnounceMessages(configs, options).ToList();
+
+            try
+            {
+                var i = 1;
+                foreach (var message in messages)
+                {
+                    using (logger.BeginScope("Topic", message.Topic))
+                    {
+                        logger.LogDebug($"Sending message {i++} out of {messages.Count}");
+                        await client.PublishAsync(message, ct);
+                        logger.LogDebug("Message sent!");
+
+                        ct.ThrowIfCancellationRequested();
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Failed to announce metrics!");
+                throw;
+            }
+
+            logger.LogInformation("Announcement completed!");
+        }
+
+        private (string, string, string) GetAssemblyMetadata()
+        {
+            string name = null, author = null, version = null;
+
+            var assembly = Assembly.GetEntryAssembly();
+            if (assembly != null)
+            {
+                foreach (var attribute in assembly.GetCustomAttributes())
+                {
+                    switch (attribute)
+                    {
+                        case AssemblyCompanyAttribute c:
+                            author = c.Company;
+                            break;
+
+                        case AssemblyVersionAttribute v:
+                            version = v.Version;
+                            break;
+
+                        case AssemblyTitleAttribute t:
+                            name = t.Title;
+                            break;
+                    }
+                }
+
+            }
+
+            return (name, author, version);
         }
 
         public async Task Notify(SuccessfulMeasurement measurement, CancellationToken ct)
@@ -88,6 +154,7 @@ namespace NVs.Probe.Mqtt
                 if (!client.IsConnected)
                 {
                     logger.LogWarning("Client is not connected, message will not be published!");
+                    return;
                 }
 
                 var message = new MqttApplicationMessageBuilder()
@@ -170,7 +237,7 @@ namespace NVs.Probe.Mqtt
                 logger.LogWarning("Dispose requested for already disposed object!");
                 return;
             }
-            
+
             internalCancellationTokenSource.Cancel();
             client.UseDisconnectedHandler((IMqttClientDisconnectedHandler)null);
             client?.Dispose();
