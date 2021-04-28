@@ -1,7 +1,11 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CliWrap;
+using CliWrap.Buffered;
 using Microsoft.Extensions.Logging;
 using NVs.Probe.Logging;
 using NVs.Probe.Metrics;
@@ -26,56 +30,26 @@ namespace NVs.Probe.Measurements
             {
                 logger.LogDebug($"Capturing new measurement ...");
 
-                var (filename, args) = ParseCommand(config.Command);
-
-                var process = new Process
-                {
-                    StartInfo = new ProcessStartInfo()
-                    {
-                        FileName = filename,
-                        Arguments = args,
-                        RedirectStandardInput = true,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        CreateNoWindow = true,
-                        UseShellExecute = false
-                    }
-                };
+                var command = Wrap(config.Command)
+                    .WithValidation(CommandResultValidation.None);
 
                 try
                 {
                     ct.ThrowIfCancellationRequested();
 
-                    if (!process.Start())
-                        throw new InvalidOperationException("Failed to start process!");
-
-                    using (logger.BeginScope("ProcessId {@ProcessId}", process.Id))
+                    var result = await command.ExecuteBufferedAsync(ct);
+                    using (logger.BeginScope("Exit code: {@exitCode}", result.ExitCode))
                     {
-                        logger.LogDebug($"Process started.");
-
-                        ct.ThrowIfCancellationRequested();
-
-                        if (!process.WaitForExit((int) commandTimeout.TotalMilliseconds))
-                            throw new InvalidOperationException($"Process did not exited in {commandTimeout}");
-
-                        logger.LogDebug("Process stopped.");
-                        var result = await process.StandardOutput.ReadToEndAsync();
-                        result = result.TrimEnd();
-
-                        if (process.ExitCode != 0)
+                        logger.LogDebug("Command executed.");
+                        var output = result.StandardOutput.TrimEnd();
+                        var error = result.StandardError.TrimEnd();
+                        if (result.ExitCode != 0)
                         {
-                            var stdErr = await process.StandardError.ReadToEndAsync();
-                            if (string.IsNullOrEmpty(stdErr))
-                            {
-                                stdErr = await process.StandardOutput.ReadToEndAsync();
-                            }
-
-                            throw new InvalidOperationException(
-                                $"Exit code: {process.ExitCode}{Environment.NewLine}Output: {result}{Environment.NewLine}  Error: {stdErr}");
+                            logger.LogWarning("Command returned non-zero exit code!");
+                            throw new InvalidOperationException($"Exit code: {result.ExitCode}{Environment.NewLine}Output: {output}{Environment.NewLine}  Error: {error}");
                         }
 
-                        logger.LogDebug("Measurement completed.");
-                        return new SuccessfulMeasurement(config.Metric, result);
+                        return new SuccessfulMeasurement(config.Metric, output);
                     }
                 }
                 catch (Exception e)
@@ -85,7 +59,7 @@ namespace NVs.Probe.Measurements
                 }
                 finally
                 {
-                    process.Dispose();
+                    command.Dispose();
                 }
             }
         }
@@ -112,6 +86,17 @@ namespace NVs.Probe.Measurements
             return i < 0
                 ? new Tuple<string, string>(command, string.Empty)
                 : new Tuple<string, string>(command.Substring(0, i), command[i..]);
+        }
+
+        private Command Wrap(string command)
+        {
+            return command.Split('|')
+                .Reverse()
+                .Select(s => 
+                    Cli.Wrap(s.Split(' ').First())
+                    .WithArguments(s.Split(' ').Skip(1)))
+                .Aggregate((s, a) => s | a);
+
         }
     }
 }
