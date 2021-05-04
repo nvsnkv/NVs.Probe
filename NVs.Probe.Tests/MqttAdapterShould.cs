@@ -40,7 +40,7 @@ namespace NVs.Probe.Tests
 
             client.Setup(
                 c => c.PublishAsync(It.Is<MqttApplicationMessage>(m =>
-                    m.Topic == $"{options.Object.ClientId}/{measurement.Metric.Topic}" && m.ConvertPayloadToString() == measurement.Result), ct))
+                    m.Topic == $"{measurement.Metric.Topic}" && m.ConvertPayloadToString() == measurement.Result), ct))
                 .Verifiable("Expected message was not published!");
 
             var adapter = new MqttAdapter(options.Object, factory.Object, new RetryOptions(null), builder.Object, logger.Object);

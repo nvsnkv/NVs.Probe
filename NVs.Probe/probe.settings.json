@@ -1,6 +1,6 @@
 {
   "Serilog": {
-    "Using": ["Serilog.Sinks.Console", "Serilog.Sinks.File"],
+    "Using": [ "Serilog.Sinks.Console", "Serilog.Sinks.File" ],
     "MinimumLevel": "Debug",
     "WriteTo": [
       { "Name": "Console" },
@@ -12,7 +12,7 @@
         }
       }
     ],
-    "Enrich": ["FromLogContext", "WithMachineName", "WithThreadId"],
+    "Enrich": [ "FromLogContext", "WithMachineName", "WithThreadId" ],
     "Destructure": [
       {
         "Name": "ToMaximumDepth",
@@ -28,7 +28,7 @@
       }
     ],
     "Properties": {
-      "Application": "Sample"
+      "Application": "Probe"
     }
   }
 }

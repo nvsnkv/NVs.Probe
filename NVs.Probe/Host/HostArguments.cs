@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using CommandLine;
 using MQTTnet.Client.Options;
+using NVs.Probe.Measurements.CommandRunner;
 using NVs.Probe.Metrics;
 using NVs.Probe.Mqtt;
 
@@ -9,12 +10,14 @@ namespace NVs.Probe.Host
 {
     sealed class HostArguments
     {
-        public HostArguments(string mqttClientId, string mqttBroker, string mqttUser, string mqttPassword, uint mqttBrokerPort, uint mqttBrokerReconnectAttempts, ulong mqttBrokerReconnectInterval, ulong measurementTimeout, ulong measurementSeriesInterval, IEnumerable<string> measurementArguments)
+        public HostArguments(string mqttClientId, string mqttBroker, string mqttUser, string mqttPassword, string interpreter, string interpreterFlags, uint mqttBrokerPort, uint mqttBrokerReconnectAttempts, ulong mqttBrokerReconnectInterval, ulong measurementTimeout, ulong measurementSeriesInterval, IEnumerable<string> measurementArguments)
         {
             MqttClientId = mqttClientId;
             MqttBroker = mqttBroker;
             MqttUser = mqttUser;
             MqttPassword = mqttPassword;
+            Interpreter = interpreter;
+            InterpreterFlags = interpreterFlags;
             MqttBrokerPort = mqttBrokerPort;
             MqttBrokerReconnectAttempts = mqttBrokerReconnectAttempts;
             MqttBrokerReconnectInterval = mqttBrokerReconnectInterval;
@@ -34,6 +37,12 @@ namespace NVs.Probe.Host
 
         [Option('p', "mqtt-password", HelpText = "Password used for authentication on MQTT broker", Required = true)]
         public string MqttPassword { get; }
+
+        [Option('i', "interpreter", HelpText = "Interpreter used to execute commands", Required = true)]
+        public string Interpreter { get; }
+        
+        [Option('f', "interpreter-flags", HelpText = "Interpreter flags", Required = true)]
+        public string InterpreterFlags { get; }
 
         [Option("mqtt-broker-port", HelpText = "Port number of MQTT broker", Default = (uint)1883)]
         public uint MqttBrokerPort { get; }
@@ -71,6 +80,11 @@ namespace NVs.Probe.Host
                     ? (TimeSpan?) null
                     : TimeSpan.FromMilliseconds(MqttBrokerReconnectInterval),
                 MqttBrokerReconnectAttempts);
+        }
+
+        public RunnerOptions GetRunnerOptions()
+        {
+            return new RunnerOptions(Interpreter, InterpreterFlags);
         }
 
         public IEnumerable<MetricConfig> GetMetricConfigs()
