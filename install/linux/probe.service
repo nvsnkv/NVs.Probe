@@ -1,0 +1,14 @@
+[Unit]
+Description=Probe - MQTT telemetry provider
+After=network-online.target
+
+[Service]
+ExecStart=probe.sh 
+WorkingDirectory=/usr/local/bin/probe
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
