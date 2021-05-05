@@ -29,7 +29,7 @@ namespace NVs.Probe.Tests
             factory.Setup(f => f.CreateMqttClient()).Returns(client.Object);
         }
 
-        [Fact]
+        [Fact, Trait("Category", "Win"), Trait("Category", "Linux")]
         public async Task NotifyAboutSuccessfulMeasurement()
         {
             var measurement = new SuccessfulMeasurement(new Metric("successful/topic"), "success");
@@ -49,7 +49,7 @@ namespace NVs.Probe.Tests
             client.VerifyAll();
         }
 
-        [Fact]
+        [Fact, Trait("Category", "Win"), Trait("Category", "Linux")]
         public async Task AnnounceTopics()
         {
             var configs = new MetricConfig[0];

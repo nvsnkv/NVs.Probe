@@ -8,7 +8,7 @@ namespace NVs.Probe.Tests
 {
     public class MetricConfigBuilderShould
     {
-        [Fact]
+        [Fact, Trait("Category", "Win"), Trait("Category", "Linux")]
         public void BuildTheConfigFromArgs()
         {
             var topics = new[] { "topic1", "topic2", "topic3" };

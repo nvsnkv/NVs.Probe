@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "NVs.Probe.Tests": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}

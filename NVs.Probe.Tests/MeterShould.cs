@@ -17,7 +17,7 @@ namespace NVs.Probe.Tests
         private readonly Mock<ILogger<Meter>> logger = new Mock<ILogger<Meter>>();
         private readonly Mock<ICommandRunner> runner = new Mock<ICommandRunner>();
 
-        [Fact]
+        [Fact, Trait("Category", "Win"), Trait("Category", "Linux")]
         public async Task ProvideResultsForSuccessfulMeasurement()
         {
             
@@ -37,7 +37,7 @@ namespace NVs.Probe.Tests
             success.Result.Should().Match(s => Regex.IsMatch(s, @"\d+.\d+.\d+"));
         }
 
-        [Fact]
+        [Fact, Trait("Category", "Win"), Trait("Category", "Linux")]
         public async Task ReturnFailedMeasurementFromFailedCommand()
         {
             var config = new MetricConfig(new Metric("failed/measurement"), "some random stuff");
