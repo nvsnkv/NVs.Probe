@@ -90,13 +90,8 @@ probe.exe -c probe -s 127.0.0.1 -u Vasya -p "no idea!" -i cmd -c '/c' "cpu_load"
 ### Logging
 Applicaion uses [Serilog](https://serilog.net/) to produce logs. Logging configuration is set up in `probe.settings.json` file.
 
-## Building and deployment
-Publish profiles in NVs.Probe project (`.\NVs.Probe\Properties\PublishProfiles`) allows to create single-file executables for windows (x64) and linux (arm).
-Both profiles publishes application to `.\publish` folder.
-
-Application is runtime-agnostic by itself, so application can be compiled for any runtime supported by .Net Core
-
-## Automated tests
+## Development notes
+### Automated tests
 There are few tests that helped me to write this tool.
 Some of them tests .Net components and can be started from any supported runtime.
 Tests with "Category" equals to "Windows" will work on Windows hosts. Tests with "Linux" "Category" works on linux machines.
