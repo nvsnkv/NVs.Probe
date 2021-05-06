@@ -9,7 +9,7 @@ The steps below will help to build Probe for ARM-based Linux host, such as Raspb
 1. run `dotnet publish NVs.Probe\NVs.Probe.csproj /p:PublishProfile=Linux_arm`;
 1. copy files from `install/linux` to `publish/linux-arm`;
 1. copy files from `publish/linux-arm` to the target machine.
-#### Windows
+#### windows-x64
 1. run `dotnet publish NVs.Probe\NVs.Probe.csproj /p:PublishProfile=Win_x64`;
 1. copy files from `publish/win-x64` to the target machine.
 1. start the application 
@@ -38,7 +38,7 @@ Application also can be started as a regular process from command line:
   "cpu_load" "cat /proc/loadavg | awk '{print $1}'" \
   "mem" "cat /proc/meminfo | grep MemFree | awk '{print $2}'"
 ```
-#### CLI sample (Windows)
+#### CLI sample (windows)
 Application should work with CMD:
 ```
 probe.exe -c probe -s 127.0.0.1 -u Vasya -p "no idea!" -i cmd -c '/c' "cpu_load" '@for /f "skip=1" %p in ('wmic cpu get loadpercentage') do @echo %p%'
