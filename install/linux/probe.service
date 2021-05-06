@@ -3,7 +3,7 @@ Description=Probe - MQTT telemetry provider
 After=network-online.target
 
 [Service]
-ExecStart=probe.sh 
+ExecStart=/bin/bash /usr/local/bin/probe/probe.sh 
 WorkingDirectory=/usr/local/bin/probe
 StandardOutput=inherit
 StandardError=inherit

@@ -28,7 +28,7 @@ The following steps are required to install application as a service
     1. ensure MQTT topics are correct!
 1. update `probe.service` script - set user if needed;
 1. review content of `install.sh` file and correct it if needed;
-1. run `sudo ./install.sh` to complete installation;
+1. run `sudo ./install.sh my_user` to complete installation. Don't forget to replace _my_user_ with the user id from probe.service!
 1. check that service is running by executing `sudo systemctl status probe.service`.
 #### CLI sample (linux)
 Application also can be started as a regular process from command line:
