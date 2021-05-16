@@ -10,7 +10,7 @@ namespace NVs.Probe.Host
 {
     sealed class HostArguments
     {
-        public HostArguments(string mqttClientId, string mqttBroker, string mqttUser, string mqttPassword, string interpreter, string interpreterFlags, uint mqttBrokerPort, uint mqttBrokerReconnectAttempts, ulong mqttBrokerReconnectInterval, ulong measurementTimeout, ulong measurementSeriesInterval, IEnumerable<string> measurementArguments)
+        public HostArguments(string mqttClientId, string mqttBroker, string mqttUser, string mqttPassword, string interpreter, string interpreterFlags, string metricsSetupPath, uint mqttBrokerPort, uint mqttBrokerReconnectAttempts, ulong mqttBrokerReconnectInterval, ulong measurementTimeout, ulong measurementSeriesInterval)
         {
             MqttClientId = mqttClientId;
             MqttBroker = mqttBroker;
@@ -23,7 +23,7 @@ namespace NVs.Probe.Host
             MqttBrokerReconnectInterval = mqttBrokerReconnectInterval;
             MeasurementTimeout = measurementTimeout;
             MeasurementSeriesInterval = measurementSeriesInterval;
-            MeasurementArguments = measurementArguments;
+            MetricsSetupPath = metricsSetupPath;
         }
 
         [Option('c', "mqtt-client-id", HelpText = "MQTT Client Identifier", Required = true)]
@@ -44,6 +44,9 @@ namespace NVs.Probe.Host
         [Option('f', "interpreter-flags", HelpText = "Interpreter flags", Required = true)]
         public string InterpreterFlags { get; }
 
+        [Option('m', "metrics-setup", HelpText =  "Path to metrics configuration", Required = true)]
+        public string MetricsSetupPath { get; }
+
         [Option("mqtt-broker-port", HelpText = "Port number of MQTT broker", Default = (uint)1883)]
         public uint MqttBrokerPort { get; }
 
@@ -58,9 +61,6 @@ namespace NVs.Probe.Host
 
         [Option("measurement-series-interval", HelpText = "Base interval between measurement series", Default = (ulong)120000)]
         public ulong MeasurementSeriesInterval { get; }
-
-        [Value(0, MetaName = "Measurements configuration", HelpText = "A series of topic-command pairs, like 'dotnet/version' 'dotnet -- version'", Required = true)]
-        public IEnumerable<string> MeasurementArguments { get; }
 
         public IMqttClientOptions GetMqttOptions(MqttClientOptionsBuilder builder)
         {
@@ -89,7 +89,7 @@ namespace NVs.Probe.Host
 
         public IEnumerable<MetricConfig> GetMetricConfigs()
         {
-            return new MetricConfigBuilder(MeasurementArguments).Build();
+            return new YAMLBasedMetricConfigBuilder().Build(MetricsSetupPath);
         }
     }
 }

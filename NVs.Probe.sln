@@ -18,6 +18,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "linux", "linux", "{4CF86304-41C8-4015-B850-4390DB2639C0}"
 	ProjectSection(SolutionItems) = preProject
 		install\linux\install.sh = install\linux\install.sh
+		probe.metrics.yaml = probe.metrics.yaml
 		install\linux\probe.service = install\linux\probe.service
 		install\linux\probe.sh = install\linux\probe.sh
 		install\linux\uninstall.sh = install\linux\uninstall.sh

@@ -1,6 +1,7 @@
-# Probe [Proof of Concept!]
-A PoC version of .net core app that collects and publishes command line based metrics to MQTT server.
-Supports configuration convention used by Home Assistant [MQTT integration](https://www.home-assistant.io/docs/mqtt/discovery/).
+# Probe
+Probe is cross-platform application that simplifies metrics collection and publishing. 
+* No custom metrics format - Probe is designed to use CLI to gather metrics. From one stand point it's not as easy as tell "Gather CPU load", but from other hand it allows you to gather any stats you can get from command line!
+* No custom telemetry protocol - Probe uses MQTT to publish measurement results. That allows you to connect Probe with you smart home infrastructure and setup as complex monitoring and automation as you wish.
 
 ## Usage
 ### Building
@@ -23,8 +24,8 @@ The following steps are required to install application as a service
 1. update `probe.sh` script:
     1. provide `--mqtt-client-id`, `--mqtt-broker-host`, `--mqtt-user`, `--mqtt-password`;
     1. update `--interpreter` and `--interpreter-flags` if needed;
+    1. update measurement configuration file `probe.metrics.yaml` and check that path to the file is correct (`-m`, `metrics-setup`);
     1. provide desired optional parameters;
-    1. provide a measurement configuration;
     1. ensure MQTT topics are correct!
 1. update `probe.service` script - set user if needed;
 1. review content of `install.sh` file and correct it if needed;
@@ -34,58 +35,62 @@ The following steps are required to install application as a service
 Application also can be started as a regular process from command line:
 ```
 #!/bin/sh
-./probe -c probe -s 127.0.0.1 -u Vasya -p "no idea!" -i sh -f '-c' -- \
-  "cpu_load" "cat /proc/loadavg | awk '{print $1}'" \
-  "mem" "cat /proc/meminfo | grep MemFree | awk '{print $2}'"
+./probe -c probe -s 127.0.0.1 -u Vasya -p "no idea!" -i sh -f '-c' -m probe.metrics.yaml
 ```
 #### CLI sample (windows)
-Application should work with CMD:
+Application should work with powershell. Leave `--interpreter-flags` blank and update probe.metrics.yaml with powershell-friendly commands.
 ```
-probe.exe -c probe -s 127.0.0.1 -u Vasya -p "no idea!" -i cmd -c '/c' "cpu_load" '@for /f "skip=1" %p in ('wmic cpu get loadpercentage') do @echo %p%'
+probe.exe -c probe -s 127.0.0.1 -u Vasya -p "no idea!" -i powershell -c '' -m -m probe.metrics.yaml
 ```
+
 ## Configuration
 ### Options
 `probe --help` will list available configuration options:
 ```
-   -c, --mqtt-client-id                   Required. MQTT Client Identifier
+  -c, --mqtt-client-id                Required. MQTT Client Identifier
 
-  -b, --mqtt-broker-host                 Required. The hostname or IP address of
-                                         MQTT broker
+  -b, --mqtt-broker-host              Required. The hostname or IP address of
+                                      MQTT broker
 
-  -u, --mqtt-user                        Required. Username used for
-                                         authentication on MQTT broker
+  -u, --mqtt-user                     Required. Username used for authentication
+                                      on MQTT broker
 
-  -p, --mqtt-password                    Required. Password used for
-                                         authentication on MQTT broker
+  -p, --mqtt-password                 Required. Password used for authentication
+                                      on MQTT broker
 
-  -i, --interpreter                      Required. Interpreter used to execute
-                                         commands
+  -i, --interpreter                   Required. Interpreter used to execute
+                                      commands
 
-  -f, --interpreter-flags                Required. Interpreter flags
+  -f, --interpreter-flags             Required. Interpreter flags
 
-  --mqtt-broker-port                     (Default: 1883) Port number of MQTT
-                                         broker
+  -m, --metrics-setup                 Required. Path to metrics configuration
 
-  --mqtt-broker-reconnect-attempts       (Default: 0) Count of attempts to
-                                         reconnect to MQTT broker in case of
-                                         broken connection
+  --mqtt-broker-port                  (Default: 1883) Port number of MQTT broker
 
-  --mqtt-broker-reconnect-interval       (Default: 5000) Base interval between
-                                         attempts to reconnect to MQTT broker
+  --mqtt-broker-reconnect-attempts    (Default: 0) Count of attempts to
+                                      reconnect to MQTT broker in case of broken
+                                      connection
 
-  --measurement-timeout                  (Default: 1000) Timeout of a single
-                                         measurement
+  --mqtt-broker-reconnect-interval    (Default: 5000) Base interval between
+                                      attempts to reconnect to MQTT broker
 
-  --measurement-series-interval          (Default: 120000) Base interval between
-                                         measurement series
+  --measurement-timeout               (Default: 1000) Timeout of a single
+                                      measurement
 
-  --help                                 Display this help screen.
+  --measurement-series-interval       (Default: 120000) Base interval between
+                                      measurement series
 
-  --version                              Display version information.
+  --help                              Display this help screen.
 
-  Measurements configuration (pos. 0)    Required. A series of topic-command
-                                         pairs, like 'dotnet/version' 'dotnet --
-                                         version'
+  --version                           Display version information.
+```
+### Metrics configuration
+Starting from version 0.2 Probe uses YAML configuration files for metrics. Example can be found below:
+```
+- topic: topic/cpu_load 
+  command: "cat /proc/loadavg | awk '{print $1}'"
+- topic: topic/mem_free 
+  command: "cat /proc/meminfo | grep MemFree | awk '{print $2}'" 
 ```
 ### Logging
 Applicaion uses [Serilog](https://serilog.net/) to produce logs. Logging configuration is set up in `probe.settings.json` file.
