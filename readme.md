@@ -1,5 +1,5 @@
-# Probe
-A .net core app that collects and publishes command line based metrics to MQTT server.
+# Probe [Prrof of Concept!]
+A PoC version of .net core app that collects and publishes command line based metrics to MQTT server.
 Supports configuration convention used by Home Assistant [MQTT integration](https://www.home-assistant.io/docs/mqtt/discovery/).
 
 ## Usage
