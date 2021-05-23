@@ -1,0 +1,3 @@
+﻿- topic: /probe
+  command: echo 1
+  

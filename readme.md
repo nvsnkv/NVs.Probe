@@ -13,7 +13,6 @@ The steps below will help to build Probe for ARM-based Linux host, such as Raspb
 #### windows-x64
 1. run `dotnet publish NVs.Probe\NVs.Probe.csproj /p:PublishProfile=Win_x64`;
 1. copy files from `publish/win-x64` to the target machine.
-1. start the application 
 #### Other runtimes
 Application is runtime-agnostic by itself and can be compiled for any runtime supported by .Net Core by specifying `runtime (-r)`  argument for `dotnet build` or `dotnet publish`
 ### Running the app

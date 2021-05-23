@@ -28,7 +28,7 @@ namespace NVs.Probe
         {
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile(path: "probe.settings.json")
+                .AddYamlFile("probe.settings.logging.yaml", true)
                 .Build();
 
             Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(configuration).CreateLogger();
