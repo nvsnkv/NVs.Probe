@@ -16,85 +16,80 @@ The steps below will help to build Probe for ARM-based Linux host, such as Raspb
 #### Other runtimes
 Application is runtime-agnostic by itself and can be compiled for any runtime supported by .Net Core by specifying `runtime (-r)`  argument for `dotnet build` or `dotnet publish`
 ### Running the app
-#### systemd service creation
-Installation files from `install/linux` folder contains sample service definition, installation and uninstallation script.
-The following steps are required to install application as a service
-1. update logging settings in `probe.settings.json` if needed
-1. update `probe.sh` script:
-    1. provide `--mqtt-client-id`, `--mqtt-broker-host`, `--mqtt-user`, `--mqtt-password`;
-    1. update `--interpreter` and `--interpreter-flags` if needed;
-    1. update measurement configuration file `probe.metrics.yaml` and check that path to the file is correct (`-m`, `metrics-setup`);
-    1. provide desired optional parameters;
-    1. ensure MQTT topics are correct!
-1. update `probe.service` script - set user if needed;
-1. review content of `install.sh` file and correct it if needed;
-1. run `sudo ./install.sh my_user` to complete installation. Don't forget to replace _my_user_ with the user id from probe.service!
-1. check that service is running by executing `sudo systemctl status probe.service`.
-#### CLI sample (linux)
-Application also can be started as a regular process from command line:
+#### Updating configuration files
+Probe reads several configuration files to retrieve the setup:
+* `probe.metrics.yaml` used to set up a list of metrics that Probe will collect
+* `probe.mqtt.yaml` used to set up connection to MQTT broker
+* `probe.serilog.logging.yaml` defines logging configuration
+
+Having several configuration files allows to share connection information or logging settings between different instances of application. 
+MQTT connection setup contains password, access to this file should be properly restricted.
+
+#### CLI
+Application can be started as a regular process from command line:
 ```
 #!/bin/sh
-./probe -c probe -s 127.0.0.1 -u Vasya -p "no idea!" -i sh -f '-c' -m probe.metrics.yaml
+probe -i sh -f '-c' -c probe.metrics.yaml -m probe.mqtt.yaml
 ```
-#### CLI sample (windows)
-Application should work with powershell. Leave `--interpreter-flags` blank and update probe.metrics.yaml with powershell-friendly commands.
-```
-probe.exe -c probe -s 127.0.0.1 -u Vasya -p "no idea!" -i powershell -c '' -m -m probe.metrics.yaml
-```
+Probe also works with Windows, both Powershell and CMD are supported.
+Application can use any other app that reads command line arguments and returns output into STDOUT to measure the metrics.
 
 ## Configuration
-### Options
+### Command line options
 `probe --help` will list available configuration options:
 ```
-  -c, --mqtt-client-id                Required. MQTT Client Identifier
+ -i, --interpreter                Required. Interpreter used to execute
+                                  commands
 
-  -b, --mqtt-broker-host              Required. The hostname or IP address of
-                                      MQTT broker
+ -f, --interpreter-flags          Required. Interpreter flags
 
-  -u, --mqtt-user                     Required. Username used for authentication
-                                      on MQTT broker
+ -s, --metrics-setup              Required. (Default: probe.metrics.yaml) Path
+                                  to metrics configuration
 
-  -p, --mqtt-password                 Required. Password used for authentication
-                                      on MQTT broker
+ -m, --mqtt-options               Required. (Default: probe.mqtt.yaml) Path to
+                                  MQTT configuration
 
-  -i, --interpreter                   Required. Interpreter used to execute
-                                      commands
+ --measurement-timeout            (Default: 1000) Timeout of a single
+                                  measurement
 
-  -f, --interpreter-flags             Required. Interpreter flags
+ --measurement-series-interval    (Default: 120000) Base interval between
+                                  measurement series
 
-  -m, --metrics-setup                 Required. Path to metrics configuration
+ --help                           Display this help screen.
 
-  --mqtt-broker-port                  (Default: 1883) Port number of MQTT broker
-
-  --mqtt-broker-reconnect-attempts    (Default: 0) Count of attempts to
-                                      reconnect to MQTT broker in case of broken
-                                      connection
-
-  --mqtt-broker-reconnect-interval    (Default: 5000) Base interval between
-                                      attempts to reconnect to MQTT broker
-
-  --measurement-timeout               (Default: 1000) Timeout of a single
-                                      measurement
-
-  --measurement-series-interval       (Default: 120000) Base interval between
-                                      measurement series
-
-  --help                              Display this help screen.
-
-  --version                           Display version information.
+ --version                        Display version information.
 ```
-### Metrics configuration
-Starting from version 0.2 Probe uses YAML configuration files for metrics. Example can be found below:
+### Metrics configuration (probe.metrics.yaml)
+Probe uses YAML configuration files for metrics. Example can be found below:
 ```
 - topic: topic/cpu_load 
   command: "cat /proc/loadavg | awk '{print $1}'"
 - topic: topic/mem_free 
   command: "cat /proc/meminfo | grep MemFree | awk '{print $2}'" 
 ```
-
 #### Metric definition
-* `topic` - string, required. Defines MQTT topic that will be used to publish values
+* `topic` - string, required. Defines MQTT topic that will be used to publish values;
 * `command` - string, required. Defines CLI command that Probe will run to measure metric value.
+
+### MQTT Connection setup (probe.mqtt.yaml)
+Another YAML file is used to define MQTT connection options:
+```
+client_id: probe
+broker: localhost
+user: Vasya
+password: "no clue"
+retries_interval: "00:00:30"
+retries_count: 5
+```
+Following parameters are required:
+* `client_id` - MQTT Client Identifier;
+* `broker` - the hostname or IP address of MQTT broker;
+* `user` - username used for authentication on MQTT broker;
+* `password` - password used for authentication on MQTT broker;
+Following parameters are optional:
+* `port` - port number of MQTT broker. Default is 1883;
+* `retries_count` - count of attempts to reconnect to MQTT broker in case of connectivity issues. Application would not try to reconnect if this parameter is not provided. `retries_interval` must be provided together with this setting. If defined, the value should be positive;
+* `retries_interval` - Base interval between attempts to reconnect to MQTT broker. Must be defined if `retries_count` is set. Must not be defined otherwise.
 
 ### Logging
 Applicaion uses [Serilog](https://serilog.net/) to produce logs. Logging configuration is set up in `probe.settings.json` file.
