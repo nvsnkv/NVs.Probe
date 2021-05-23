@@ -21,7 +21,7 @@ namespace NVs.Probe.Mqtt
                 return type == typeof(MqttOptions);
             }
 
-            public object? ReadYaml(IParser parser, Type type)
+            public object ReadYaml(IParser parser, Type type)
             {
                 string clientId = null, username = null, pwd = null, broker = null;
                 int? port = null, retriesCount = null;
@@ -91,7 +91,7 @@ namespace NVs.Probe.Mqtt
                 return new MqttOptions(client, new RetryOptions(retriesInterval, (uint)(retriesCount ?? 0)));
             }
 
-            public void WriteYaml(IEmitter emitter, object? value, Type type)
+            public void WriteYaml(IEmitter emitter, object value, Type type)
             {
                 throw new NotImplementedException();
             }

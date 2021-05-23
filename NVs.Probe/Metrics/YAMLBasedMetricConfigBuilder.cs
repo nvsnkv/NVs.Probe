@@ -8,9 +8,9 @@ using YamlDotNet.Serialization;
 
 namespace NVs.Probe.Metrics
 {
-    internal sealed class YAMLBasedMetricConfigBuilder:YamlConfigBuilder<IEnumerable<MetricConfig>>
+    internal sealed class YamlBasedMetricConfigBuilder:YamlConfigBuilder<IEnumerable<MetricConfig>>
     {
-        public YAMLBasedMetricConfigBuilder():base(new MetricTypeConverter())
+        public YamlBasedMetricConfigBuilder():base(new MetricTypeConverter())
         {
         }
         

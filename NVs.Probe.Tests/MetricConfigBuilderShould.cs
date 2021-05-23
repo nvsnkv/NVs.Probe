@@ -24,7 +24,7 @@ namespace NVs.Probe.Tests
                 input += $"  command: {commands[i]}{Environment.NewLine}";
             }
 
-            var result = new YAMLBasedMetricConfigBuilder().Build(new StringReader(input)).ToList();
+            var result = new YamlBasedMetricConfigBuilder().Build(new StringReader(input)).ToList();
             result.Should().HaveCount(topics.Length);
             for (var i = 0; i < topics.Length; i++)
             {

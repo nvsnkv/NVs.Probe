@@ -48,7 +48,7 @@ namespace NVs.Probe.Config
 
         public IEnumerable<MetricConfig> GetMetricConfigs()
         {
-            return new YAMLBasedMetricConfigBuilder().Build(MetricsSetupPath);
+            return new YamlBasedMetricConfigBuilder().Build(MetricsSetupPath);
         }
     }
 }
