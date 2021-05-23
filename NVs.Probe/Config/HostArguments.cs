@@ -38,7 +38,7 @@ namespace NVs.Probe.Config
 
         public MqttOptions GetMqttOptions()
         {
-            return new YAMLBasedMqttOptionsBuilder().Build(MqttSetupPath);
+            return new YamlBasedMqttOptionsBuilder().Build(MqttSetupPath);
         }
         
         public RunnerOptions GetRunnerOptions()

@@ -1,37 +1,17 @@
 ﻿using System;
 using System.IO;
 using MQTTnet.Client.Options;
+using NVs.Probe.Config;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 
 namespace NVs.Probe.Mqtt
 {
-    internal class YAMLBasedMqttOptionsBuilder
+    internal class YamlBasedMqttOptionsBuilder:YamlConfigBuilder<MqttOptions>
     {
-        private readonly IDeserializer deserializer;
-
-        public YAMLBasedMqttOptionsBuilder()
+        public YamlBasedMqttOptionsBuilder() : base(new MqttOptionsConverter())
         {
-            deserializer = new DeserializerBuilder()
-                .WithTypeConverter(new MqttOptionsConverter())
-                .Build();
-        }
-
-        public MqttOptions Build(string filePath)
-        {
-            if (!File.Exists(filePath))
-            {
-                throw new FileNotFoundException("Configuration file does not exists!", filePath);
-            }
-
-            using var rdr = new StreamReader(File.OpenRead(filePath));
-            return Build(rdr);
-        }
-
-        internal MqttOptions Build(TextReader reader)
-        {
-            return deserializer.Deserialize<MqttOptions>(reader);
         }
 
         private class MqttOptionsConverter : IYamlTypeConverter

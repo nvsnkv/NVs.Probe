@@ -1,18 +1,21 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections;
+using System.IO;
 using YamlDotNet.Serialization;
 
 namespace NVs.Probe.Config
 {
-    internal sealed class YamlConfigBuilder<TConfig, TConverter> where TConverter : class, IYamlTypeConverter, new()
+    internal class YamlConfigBuilder<T>
     {
         private readonly IDeserializer deserializer;
 
-        public YamlConfigBuilder()
+        public YamlConfigBuilder(IYamlTypeConverter converter)
         {
-            deserializer = new DeserializerBuilder().WithTypeConverter(new TConverter()).Build();
+            if (converter == null) throw new ArgumentNullException(nameof(converter));
+            deserializer = new DeserializerBuilder().WithTypeConverter(converter).Build();
         }
 
-        public TConfig Build(string filePath)
+        public T Build(string filePath)
         {
             if (!File.Exists(filePath))
             {
@@ -23,9 +26,9 @@ namespace NVs.Probe.Config
             return Build(rdr);
         }
 
-        public TConfig Build(TextReader reader)
+        public T Build(TextReader reader)
         {
-            return deserializer.Deserialize<TConfig>(reader);
+            return deserializer.Deserialize<T>(reader);
         }
     }
 }

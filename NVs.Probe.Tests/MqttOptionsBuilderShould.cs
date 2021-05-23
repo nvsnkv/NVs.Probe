@@ -29,7 +29,7 @@ namespace NVs.Probe.Tests
         [Fact, Trait("Category", "Win"), Trait("Category", "Linux")]
         public void ReadBlockStyledOptions()
         {
-            var options = new YAMLBasedMqttOptionsBuilder().Build(new StringReader(requiredInput));
+            var options = new YamlBasedMqttOptionsBuilder().Build(new StringReader(requiredInput));
             options.ClientOptions.ClientId.Should().BeEquivalentTo(clientId);
             options.ClientOptions.Credentials.Username.Should().BeEquivalentTo(user);
             options.ClientOptions.Credentials.Password.Should().BeEquivalentTo(Encoding.UTF8.GetBytes(pwd));
@@ -47,7 +47,7 @@ namespace NVs.Probe.Tests
             var port = 8800;
             var input = requiredInput + $"port: {port}";
 
-            var options = new YAMLBasedMqttOptionsBuilder().Build(new StringReader(input));
+            var options = new YamlBasedMqttOptionsBuilder().Build(new StringReader(input));
             options.ClientOptions.ChannelOptions.Should().BeOfType<MqttClientTcpOptions>();
             ((MqttClientTcpOptions)options.ClientOptions.ChannelOptions).Port.Should().HaveValue();
             // ReSharper disable once PossibleInvalidOperationException
@@ -62,7 +62,7 @@ namespace NVs.Probe.Tests
             var input = requiredInput + $"retries_count: {attempts}{Environment.NewLine}";
             input = input + $"retries_interval: {intervalBetweenRetries}{Environment.NewLine}";
 
-            var options = new YAMLBasedMqttOptionsBuilder().Build(new StringReader(input));
+            var options = new YamlBasedMqttOptionsBuilder().Build(new StringReader(input));
             options.RetryOptions.Should().NotBeNull();
             options.RetryOptions.ShouldRetry.Should().BeTrue();
             options.RetryOptions.Interval.Should().Be(intervalBetweenRetries);
