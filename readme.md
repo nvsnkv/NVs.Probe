@@ -92,6 +92,11 @@ Starting from version 0.2 Probe uses YAML configuration files for metrics. Examp
 - topic: topic/mem_free 
   command: "cat /proc/meminfo | grep MemFree | awk '{print $2}'" 
 ```
+
+#### Metric definition
+* `topic` - string, required. Defines MQTT topic that will be used to publish values
+* `command` - string, required. Defines CLI command that Probe will run to measure metric value.
+
 ### Logging
 Applicaion uses [Serilog](https://serilog.net/) to produce logs. Logging configuration is set up in `probe.settings.json` file.
 
