@@ -12,7 +12,7 @@ namespace NVs.Probe.Tests
     public class MetricConfigBuilderShould
     {
         [Fact, Trait("Category", "Win"), Trait("Category", "Linux")]
-        public void ReadBLockStyledYAMLConfiguration()
+        public void ReadBlockStyledYAMLConfiguration()
         {
             var topics = new[] { "topic1", "topic2", "topic3" };
             var commands = new[] { "command1", "command2", "command3" };
@@ -35,3 +35,5 @@ namespace NVs.Probe.Tests
         }
     }
 }
+
+

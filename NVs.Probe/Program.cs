@@ -66,6 +66,7 @@ namespace NVs.Probe
 
         private static IHost BuildHost(HostArguments args)
         {
+            var mqttOptions = args.GetMqttOptions();
             return new HostBuilder()
                 .ConfigureServices(services =>
                 {
@@ -75,10 +76,9 @@ namespace NVs.Probe
                         new Meter(
                             new ShellCommandRunner(args.GetRunnerOptions(), TimeSpan.FromMilliseconds(args.MeasurementTimeout), 
                             s.GetService<ILogger<ShellCommandRunner>>()), s.GetService<ILogger<Meter>>()),
-                        new MqttAdapter(
-                            args.GetMqttOptions(new MqttClientOptionsBuilder()),
+                        new MqttAdapter(mqttOptions.ClientOptions,
                             new MqttFactory(),
-                            args.GetMqttRetryOptions(),
+                            mqttOptions.RetryOptions,
                             new MqttAnnounceBuilder(typeof(Program).Assembly, s.GetService<ILogger<MqttAnnounceBuilder>>()),
                             s.GetService<ILogger<MqttAdapter>>()),
                         s.GetService<ILogger<Payload>>()));
