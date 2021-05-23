@@ -9,7 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Client.Options;
-using NVs.Probe.Host;
+using NVs.Probe.Config;
 using NVs.Probe.Measurements;
 using NVs.Probe.Measurements.CommandRunner;
 using NVs.Probe.Mqtt;

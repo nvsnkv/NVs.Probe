@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using CommandLine;
-using MQTTnet.Client.Options;
 using NVs.Probe.Measurements.CommandRunner;
 using NVs.Probe.Metrics;
 using NVs.Probe.Mqtt;
 
-namespace NVs.Probe.Host
+namespace NVs.Probe.Config
 {
-    sealed class HostArguments
+    internal sealed class HostArguments
     {
         public HostArguments(string interpreter, string interpreterFlags, string metricsSetupPath, string mqttSetupPath, ulong measurementTimeout, ulong measurementSeriesInterval)
         {
