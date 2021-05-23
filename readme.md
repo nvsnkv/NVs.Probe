@@ -85,14 +85,15 @@ Following parameters are required:
 * `client_id` - MQTT Client Identifier;
 * `broker` - the hostname or IP address of MQTT broker;
 * `user` - username used for authentication on MQTT broker;
-* `password` - password used for authentication on MQTT broker;
+* `password` - password used for authentication on MQTT broker.
+
 Following parameters are optional:
 * `port` - port number of MQTT broker. Default is 1883;
 * `retries_count` - count of attempts to reconnect to MQTT broker in case of connectivity issues. Application would not try to reconnect if this parameter is not provided. `retries_interval` must be provided together with this setting. If defined, the value should be positive;
 * `retries_interval` - Base interval between attempts to reconnect to MQTT broker. Must be defined if `retries_count` is set. Must not be defined otherwise.
 
 ### Logging
-Applicaion uses [Serilog](https://serilog.net/) to produce logs. Logging configuration is set up in `probe.settings.json` file.
+Applicaion uses [Serilog](https://serilog.net/) to produce logs. Logging configuration is set up in `probe.serilog.logging.yaml` file.
 
 ## Development notes
 ### Automated tests
