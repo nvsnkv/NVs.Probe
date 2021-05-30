@@ -68,7 +68,7 @@ Some interpreters does not requre it (`powershell 'echo 1'`);
 Application can be started as a regular process from command line:
 ```
 #!/bin/sh
-probe serve -c probe.settings.yaml
+probe serve -c probe.settings.yaml -i my_probe
 ```
 Probe also works with Windows, both Powershell and CMD are supported.
 Application can use any other app that reads command line arguments and returns output into STDOUT to measure the metrics.

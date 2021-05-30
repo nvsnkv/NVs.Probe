@@ -3,7 +3,7 @@ Description=Probe - MQTT telemetry provider
 After=network-online.target
 
 [Service]
-ExecStart=/usr/local/bin/probe/probe deploy -c /usr/local/bin/probe/probe.settings.yaml
+ExecStart=/usr/local/bin/probe/probe deploy -c /usr/local/bin/probe/probe.settings.yaml -i probe.service
 StandardOutput=inherit
 StandardError=inherit
 Restart=always

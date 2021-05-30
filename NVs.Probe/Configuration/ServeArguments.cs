@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using CommandLine;
-using NVs.Probe.Execution;
-using NVs.Probe.Metrics;
-using NVs.Probe.Mqtt;
+﻿using CommandLine;
+
+// ReSharper disable ClassNeverInstantiated.Global
 
 namespace NVs.Probe.Configuration
 {
@@ -14,9 +10,13 @@ namespace NVs.Probe.Configuration
         [Option('c', "configuration-path", HelpText = "A path to configuration file for probe", Required = true)]
         public string ConfigurationPath { get; }
 
-        public ServeArguments(string configurationPath)
+        [Option('i', "instance-id", Required = true, HelpText = "Instance identified used to communicate with it")]
+        public string InstanceId { get; }
+
+        public ServeArguments(string configurationPath, string instanceId)
         {
             ConfigurationPath = configurationPath;
+            InstanceId = instanceId;
         }
 
         public ProbeConfiguration GetConfiguration()

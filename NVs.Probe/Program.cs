@@ -12,6 +12,7 @@ using NVs.Probe.Configuration;
 using NVs.Probe.Execution;
 using NVs.Probe.Measuring;
 using NVs.Probe.Mqtt;
+using NVs.Probe.Server;
 using Serilog;
 
 [assembly: InternalsVisibleTo("NVs.Probe.Tests")]
@@ -79,6 +80,8 @@ namespace NVs.Probe
                             new MqttAnnounceBuilder(typeof(Program).Assembly, s.GetService<ILogger<MqttAnnounceBuilder>>()),
                             s.GetService<ILogger<MqttAdapter>>()),
                         s.GetService<ILogger<Server.Probe>>()));
+
+                    services.AddSingleton(s => new PipeController(args.InstanceId, s.GetService<IHostedService>(), s.GetService<ILogger<PipeController>>()));
                 })
                 .UseSerilog()
                 .Build();
