@@ -10,7 +10,7 @@ using MQTTnet.Client;
 using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
 using NVs.Probe.Logging;
-using NVs.Probe.Measurements;
+using NVs.Probe.Measuring;
 using NVs.Probe.Metrics;
 
 namespace NVs.Probe.Mqtt

@@ -1,13 +1,12 @@
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using NVs.Probe.Execution;
 using NVs.Probe.Logging;
-using NVs.Probe.Measurements.CommandRunner;
 using NVs.Probe.Metrics;
 
-namespace NVs.Probe.Measurements
+namespace NVs.Probe.Measuring
 {
     internal sealed class Meter : IMeter
     {

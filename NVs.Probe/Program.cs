@@ -9,9 +9,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Client.Options;
-using NVs.Probe.Config;
-using NVs.Probe.Measurements;
-using NVs.Probe.Measurements.CommandRunner;
+using NVs.Probe.Configuration;
+using NVs.Probe.Execution;
+using NVs.Probe.Measuring;
 using NVs.Probe.Mqtt;
 using Serilog;
 using ILogger = Serilog.ILogger;
@@ -70,9 +70,8 @@ namespace NVs.Probe
             return new HostBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddSingleton<IHostedService>(s => new Payload(
-                        args.GetMetricConfigs(),
-                        TimeSpan.FromMilliseconds(args.MeasurementSeriesInterval),
+                    services.AddSingleton<IHostedService>(s => new Probe(
+                        new ProbeOptions(args.GetMetricConfigs(), TimeSpan.FromMilliseconds(args.MeasurementSeriesInterval)),
                         new Meter(
                             new ShellCommandRunner(args.GetRunnerOptions(), TimeSpan.FromMilliseconds(args.MeasurementTimeout), 
                             s.GetService<ILogger<ShellCommandRunner>>()), s.GetService<ILogger<Meter>>()),
@@ -81,7 +80,7 @@ namespace NVs.Probe
                             mqttOptions.RetryOptions,
                             new MqttAnnounceBuilder(typeof(Program).Assembly, s.GetService<ILogger<MqttAnnounceBuilder>>()),
                             s.GetService<ILogger<MqttAdapter>>()),
-                        s.GetService<ILogger<Payload>>()));
+                        s.GetService<ILogger<Probe>>()));
                 })
                 .UseSerilog()
                 .Build();

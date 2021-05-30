@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.IO;
 using YamlDotNet.Serialization;
 
-namespace NVs.Probe.Config
+namespace NVs.Probe.Configuration
 {
     internal class YamlConfigBuilder<T>
     {

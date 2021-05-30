@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NVs.Probe.Measurements.CommandRunner;
+using NVs.Probe.Execution;
 using Xunit;
 
 namespace NVs.Probe.Tests

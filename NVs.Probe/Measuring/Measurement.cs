@@ -1,7 +1,7 @@
 ﻿using System;
 using NVs.Probe.Metrics;
 
-namespace NVs.Probe.Measurements
+namespace NVs.Probe.Measuring
 {
     internal abstract class Measurement
     {

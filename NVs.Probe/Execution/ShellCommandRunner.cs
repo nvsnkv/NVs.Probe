@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace NVs.Probe.Measurements.CommandRunner
+namespace NVs.Probe.Execution
 {
     internal sealed class ShellCommandRunner : ICommandRunner
     {

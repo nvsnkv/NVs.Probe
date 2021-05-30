@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using CommandLine;
-using NVs.Probe.Measurements.CommandRunner;
+using NVs.Probe.Execution;
 using NVs.Probe.Metrics;
 using NVs.Probe.Mqtt;
 
-namespace NVs.Probe.Config
+namespace NVs.Probe.Configuration
 {
     internal sealed class HostArguments
     {
@@ -46,9 +47,9 @@ namespace NVs.Probe.Config
             return new RunnerOptions(Interpreter, InterpreterFlags);
         }
 
-        public IEnumerable<MetricConfig> GetMetricConfigs()
+        public IReadOnlyList<MetricConfig> GetMetricConfigs()
         {
-            return new YamlBasedMetricConfigBuilder().Build(MetricsSetupPath);
+            return new YamlBasedMetricConfigBuilder().Build(MetricsSetupPath).ToList().AsReadOnly();
         }
     }
 }

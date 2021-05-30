@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NVs.Probe.Measurements;
-using NVs.Probe.Measurements.CommandRunner;
+using NVs.Probe.Execution;
+using NVs.Probe.Measuring;
 using NVs.Probe.Metrics;
 using Xunit;
 

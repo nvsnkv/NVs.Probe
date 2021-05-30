@@ -1,7 +1,7 @@
 ﻿using System;
-using NVs.Probe.Measurements.CommandRunner;
+using NVs.Probe.Execution;
 
-namespace NVs.Probe.Measurements
+namespace NVs.Probe.Measuring
 {
     internal sealed class MeterOptions
     {

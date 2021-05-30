@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NVs.Probe.Measurements.CommandRunner
+namespace NVs.Probe.Execution
 {
     internal sealed class RunnerOptions
     {

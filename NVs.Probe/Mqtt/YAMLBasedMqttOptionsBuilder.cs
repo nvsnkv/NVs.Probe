@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using MQTTnet.Client.Options;
-using NVs.Probe.Config;
+using NVs.Probe.Configuration;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;

@@ -1,11 +1,11 @@
 ﻿using System;
-using NVs.Probe.Config;
-using NVs.Probe.Measurements.CommandRunner;
+using NVs.Probe.Configuration;
+using NVs.Probe.Execution;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 
-namespace NVs.Probe.Measurements
+namespace NVs.Probe.Measuring
 {
     internal sealed class MeterConfigBuilder : YamlConfigBuilder<MeterOptions> 
     {
