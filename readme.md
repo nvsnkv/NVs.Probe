@@ -15,27 +15,65 @@ The steps below will help to build Probe for ARM-based Linux host, such as Raspb
 1. copy files from `publish/win-x64` to the target machine.
 #### Other runtimes
 Application is runtime-agnostic by itself and can be compiled for any runtime supported by .Net Core by specifying `runtime (-r)`  argument for `dotnet build` or `dotnet publish`
-### Running the app
-#### Updating configuration files
-Probe reads several configuration files to retrieve the setup:
-* `probe.metrics.yaml` used to set up a list of metrics that Probe will collect
-* `probe.mqtt.yaml` used to set up connection to MQTT broker
-* `probe.serilog.logging.yaml` defines logging configuration
 
-Having several configuration files allows to share connection information or logging settings between different instances of application. 
-MQTT connection setup contains password, access to this file should be properly restricted.
+### Running the app
+#### Updating configuration file
+Probe reads configuration file  (`-c` option) to retrieve its setup. Sample file content can be found below:
+```
+mqtt:
+  client_id: probe
+  broker: mqtt.local
+  user: mqtt_user
+  password: mqtt_password
+
+runner:
+  shell: sh
+  flags: "-c"
+
+metrics:
+  - topic: /probe/echo/1
+    command: echo 1
+  - topic: /probe/echo/2
+    command: echo 2
+```
+[!] Configuration file contains password for MQTT broker in it, so please ensure the access to this file is properly restricted!
+
+Configuration file consist of 3 required groups - MQTT configuration, Command Runner setup and the list of metrics.
+##### Metrics configuration (mertics)
+Metrics are configured as a pairs of MQTT topic and CLI command associated with it:
+* `topic` - string, required. Defines MQTT topic that will be used to publish values;
+* `command` - string, required. Defines CLI command that Probe will run to measure metric value.
+
+In addition to the sequence of metrics optional `inter_series_delay` parameter can be used to adjust time interval between two series of measurements. Default is "00:02:00", 2 minutes.
+##### MQTT Connection setup (mqtt)
+Following parameters are required:
+* `client_id` - string, MQTT Client Identifier;
+* `broker` - string, the hostname or IP address of MQTT broker;
+* `user` - string, username used for authentication on MQTT broker;
+* `password` - string, password used for authentication on MQTT broker.
+
+Following parameters are optional:
+* `port` - interger, port number of MQTT broker. Default is 1883;
+* `retries_count` - integer, count of attempts to reconnect to MQTT broker in case of connectivity issues. Application would not try to reconnect if this parameter is not provided. `retries_interval` must be provided together with this setting. If defined, the value should be positive;
+* `retries_interval` - TimeSpan. Base interval between attempts to reconnect to MQTT broker. Must be defined if `retries_count` is set. Must not be defined otherwise.
+##### Runner configuration (runner)
+Runner configuration allows to define which interpreter will be used to run the metrics and what would be a command timeout. Following parameter is required:
+* `shell` - string, required. Interpreter to use for measurements. Can be any application that receives command as command line arguments.
+Following parameters are optional
+* `flags` - string, optional. Interpreter flags. Should be used if interpreter does not execute commands from command line parameters by default. Some interpreters requires special flags to be provided to treat remaining command line as a command to execute (`sh -c 'echo 1'` or `cmd /c 'echo 1'` ).
+Some interpreters does not requre it (`powershell 'echo 1'`);
+* `command_timeout` - TimeSpan, optional. Command timeout. Default is "00:00:02".
 
 #### CLI
 Application can be started as a regular process from command line:
 ```
 #!/bin/sh
-probe -i sh -f '-c' -c probe.metrics.yaml -m probe.mqtt.yaml
+probe deploy -c probe.settings.yaml
 ```
 Probe also works with Windows, both Powershell and CMD are supported.
 Application can use any other app that reads command line arguments and returns output into STDOUT to measure the metrics.
 
-## Configuration
-### Command line options
+##### Command line options
 `probe --help` will list available configuration options:
 ```
  -i, --interpreter                Required. Interpreter used to execute
@@ -59,39 +97,6 @@ Application can use any other app that reads command line arguments and returns 
 
  --version                        Display version information.
 ```
-### Metrics configuration (probe.metrics.yaml)
-Probe uses YAML configuration files for metrics. Example can be found below:
-```
-- topic: topic/cpu_load 
-  command: "cat /proc/loadavg | awk '{print $1}'"
-- topic: topic/mem_free 
-  command: "cat /proc/meminfo | grep MemFree | awk '{print $2}'" 
-```
-#### Metric definition
-* `topic` - string, required. Defines MQTT topic that will be used to publish values;
-* `command` - string, required. Defines CLI command that Probe will run to measure metric value.
-
-### MQTT Connection setup (probe.mqtt.yaml)
-Another YAML file is used to define MQTT connection options:
-```
-client_id: probe
-broker: localhost
-user: Vasya
-password: "no clue"
-retries_interval: "00:00:30"
-retries_count: 5
-```
-Following parameters are required:
-* `client_id` - MQTT Client Identifier;
-* `broker` - the hostname or IP address of MQTT broker;
-* `user` - username used for authentication on MQTT broker;
-* `password` - password used for authentication on MQTT broker.
-
-Following parameters are optional:
-* `port` - port number of MQTT broker. Default is 1883;
-* `retries_count` - count of attempts to reconnect to MQTT broker in case of connectivity issues. Application would not try to reconnect if this parameter is not provided. `retries_interval` must be provided together with this setting. If defined, the value should be positive;
-* `retries_interval` - Base interval between attempts to reconnect to MQTT broker. Must be defined if `retries_count` is set. Must not be defined otherwise.
-
 ### Logging
 Applicaion uses [Serilog](https://serilog.net/) to produce logs. Logging configuration is set up in `probe.serilog.logging.yaml` file.
 
