@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NVs.Probe.Execution;
 using NVs.Probe.Metrics;
 using NVs.Probe.Mqtt;
+using NVs.Probe.Server;
 
 namespace NVs.Probe.Configuration
 {

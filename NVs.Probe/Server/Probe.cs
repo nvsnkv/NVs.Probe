@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
@@ -9,7 +8,7 @@ using NVs.Probe.Measuring;
 using NVs.Probe.Metrics;
 using NVs.Probe.Mqtt;
 
-namespace NVs.Probe
+namespace NVs.Probe.Server
 {
     internal sealed class Probe : IHostedService
     {

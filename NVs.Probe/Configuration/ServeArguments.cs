@@ -8,13 +8,13 @@ using NVs.Probe.Mqtt;
 
 namespace NVs.Probe.Configuration
 {
-    [Verb("deploy")]
-    internal sealed class DeployArguments
+    [Verb("serve")]
+    internal sealed class ServeArguments
     {
         [Option('c', "configuration-path", HelpText = "A path to configuration file for probe", Required = true)]
         public string ConfigurationPath { get; }
 
-        public DeployArguments(string configurationPath)
+        public ServeArguments(string configurationPath)
         {
             ConfigurationPath = configurationPath;
         }

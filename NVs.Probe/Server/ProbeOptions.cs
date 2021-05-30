@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using NVs.Probe.Metrics;
 
-namespace NVs.Probe
+namespace NVs.Probe.Server
 {
     internal sealed class ProbeOptions
     {

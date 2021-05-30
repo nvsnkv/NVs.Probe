@@ -35,7 +35,7 @@ namespace NVs.Probe
             {
                 Log.Information("Starting host..");
                 var parser = new Parser(with => with.EnableDashDash = true);
-                var result = parser.ParseArguments<DeployArguments>(args);
+                var result = parser.ParseArguments<ServeArguments>(args);
                 result
                     .WithParsed((a) =>
                     {
@@ -62,13 +62,13 @@ namespace NVs.Probe
             }
         }
 
-        private static IHost BuildHost(DeployArguments args)
+        private static IHost BuildHost(ServeArguments args)
         {
             var configuration = args.GetConfiguration();
             return new HostBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddSingleton<IHostedService>(s => new Probe(
+                    services.AddSingleton<IHostedService>(s => new Server.Probe(
                         configuration.ProbeOptions,
                         new Meter(
                             new ShellCommandRunner(configuration.RunnerOptions, 
@@ -78,7 +78,7 @@ namespace NVs.Probe
                             configuration.MqttOptions.RetryOptions,
                             new MqttAnnounceBuilder(typeof(Program).Assembly, s.GetService<ILogger<MqttAnnounceBuilder>>()),
                             s.GetService<ILogger<MqttAdapter>>()),
-                        s.GetService<ILogger<Probe>>()));
+                        s.GetService<ILogger<Server.Probe>>()));
                 })
                 .UseSerilog()
                 .Build();

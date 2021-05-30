@@ -4,6 +4,7 @@ using System.IO;
 using NVs.Probe.Execution;
 using NVs.Probe.Metrics;
 using NVs.Probe.Mqtt;
+using NVs.Probe.Server;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
