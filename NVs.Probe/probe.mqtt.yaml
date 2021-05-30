@@ -1,6 +1,0 @@
-﻿client_id: probe
-broker: 
-user: 
-password: 
-retries_interval: "00:00:30"
-retries_count: 5

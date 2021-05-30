@@ -1,20 +1,29 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using NVs.Probe.Execution;
+using NVs.Probe.Metrics;
+using NVs.Probe.Mqtt;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace NVs.Probe.Configuration
 {
-    internal class YamlConfigBuilder<T>
+    internal class YamlConfigBuilder
     {
         private readonly IDeserializer deserializer;
 
-        public YamlConfigBuilder(IYamlTypeConverter converter)
+        public YamlConfigBuilder()
         {
-            if (converter == null) throw new ArgumentNullException(nameof(converter));
-            deserializer = new DeserializerBuilder().WithTypeConverter(converter).Build();
+            deserializer = new DeserializerBuilder()
+                .WithTypeConverter(new YamlMetricTypeConverter())
+                .WithTypeConverter(new YamlMqttOptionsConverter())
+                .WithTypeConverter(new YamlRunnerOptionsConverter())
+                .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                .Build();
         }
 
-        public T Build(string filePath)
+        public ProbeConfiguration Build(string filePath)
         {
             if (!File.Exists(filePath))
             {
@@ -25,9 +34,23 @@ namespace NVs.Probe.Configuration
             return Build(rdr);
         }
 
-        public T Build(TextReader reader)
+        public ProbeConfiguration Build(TextReader reader)
         {
-            return deserializer.Deserialize<T>(reader);
+            var tempConfig = deserializer.Deserialize<ReadWriteConfiguration>(reader);
+
+            return new ProbeConfiguration(new ProbeOptions(tempConfig.Metrics.AsReadOnly(), tempConfig.InterSeriesDelay), tempConfig.Runner, tempConfig.Mqtt);
+        }
+
+        // ReSharper disable once ClassNeverInstantiated.Local
+        private sealed class ReadWriteConfiguration
+        {
+            public List<MetricConfig> Metrics { get; set; }
+
+            public TimeSpan InterSeriesDelay { get; set; }
+
+            public MqttOptions Mqtt { get; set; }
+
+            public RunnerOptions Runner { get; set; }
         }
     }
 }
