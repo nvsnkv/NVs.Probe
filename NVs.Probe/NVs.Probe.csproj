@@ -34,6 +34,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="probe.mqtt.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </None>
     <None Update="probe.metrics.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>

@@ -1,37 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using NVs.Probe.Config;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 
 namespace NVs.Probe.Metrics
 {
-    internal sealed class YAMLBasedMetricConfigBuilder
+    internal sealed class YamlBasedMetricConfigBuilder:YamlConfigBuilder<IEnumerable<MetricConfig>>
     {
-        private readonly IDeserializer deserializer;
-
-        public YAMLBasedMetricConfigBuilder()
+        public YamlBasedMetricConfigBuilder():base(new MetricTypeConverter())
         {
-            deserializer =  new DeserializerBuilder().WithTypeConverter(new MetricTypeConverter()).Build();
         }
-
-        public IEnumerable<MetricConfig> Build(string filePath)
-        {
-            if (!File.Exists(filePath))
-            {
-                throw new FileNotFoundException("Configuration file does not exists!", filePath);
-            }
-
-            using var rdr = new StreamReader(File.OpenRead(filePath));
-            return Build(rdr);
-        }
-
-        public IEnumerable<MetricConfig> Build(TextReader rdr)
-        {
-            return deserializer.Deserialize<IEnumerable<MetricConfig>>(rdr);
-        }
-
+        
         private sealed class MetricTypeConverter : IYamlTypeConverter
         {
             public bool Accepts(Type type)

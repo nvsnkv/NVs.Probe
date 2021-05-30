@@ -12,7 +12,7 @@ namespace NVs.Probe.Tests
     public class MetricConfigBuilderShould
     {
         [Fact, Trait("Category", "Win"), Trait("Category", "Linux")]
-        public void ReadBLockStyledYAMLConfiguration()
+        public void ReadBlockStyledYAMLConfiguration()
         {
             var topics = new[] { "topic1", "topic2", "topic3" };
             var commands = new[] { "command1", "command2", "command3" };
@@ -24,7 +24,7 @@ namespace NVs.Probe.Tests
                 input += $"  command: {commands[i]}{Environment.NewLine}";
             }
 
-            var result = new YAMLBasedMetricConfigBuilder().Build(new StringReader(input)).ToList();
+            var result = new YamlBasedMetricConfigBuilder().Build(new StringReader(input)).ToList();
             result.Should().HaveCount(topics.Length);
             for (var i = 0; i < topics.Length; i++)
             {
@@ -35,3 +35,5 @@ namespace NVs.Probe.Tests
         }
     }
 }
+
+
