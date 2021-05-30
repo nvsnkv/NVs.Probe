@@ -34,15 +34,23 @@ namespace NVs.Probe.Configuration
 
         [Value(0, Required = false, HelpText = "An instance identifier for new instance of probe", Default = null)]
         public string InstanceId { get; }
-
-        [Option('v', "verbose", Required = false, HelpText = "Enable verbose output")]
-        public bool Verbose { get; }
-
-        public DeployArguments(string configurationPath, string instanceId, bool verbose)
+        
+        public DeployArguments(string configurationPath, string instanceId)
         {
             ConfigurationPath = configurationPath;
-            Verbose = verbose;
             InstanceId = instanceId ?? Guid.NewGuid().ToString();
+        }
+    }
+
+    [Verb("stop")]
+    internal sealed class StopArguments
+    {
+        [Value(0, Required = true, HelpText = "An identifier of existing probe instance to stop", Default = null)]
+        public string InstanceId { get; }
+
+        public StopArguments(string instanceId)
+        { 
+            InstanceId = instanceId;
         }
     }
 }

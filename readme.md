@@ -65,13 +65,18 @@ Some interpreters does not requre it (`powershell 'echo 1'`);
 * `command_timeout` - TimeSpan, optional. Command timeout. Default is "00:00:02".
 
 #### CLI
+The recommended way is to start new application using `deploy` verb - it will launch a separate process without blocking initial one:
+```
+probe deploy -c probe.settings.yaml my_probe
+```
+Use `stop` verb to terminate a host:
+```
+probe stop my_probe
+```
 Application can be started as a regular process from command line:
 ```
-#!/bin/sh
 probe serve -c probe.settings.yaml -i my_probe
 ```
-Probe also works with Windows, both Powershell and CMD are supported.
-Application can use any other app that reads command line arguments and returns output into STDOUT to measure the metrics.
 
 ##### Command line options
 `probe --help` will list available configuration options:

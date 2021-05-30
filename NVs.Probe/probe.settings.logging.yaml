@@ -1,6 +1,5 @@
 ﻿Serilog:
   Using:
-  - Serilog.Sinks.Console
   - Serilog.Sinks.File
   MinimumLevel: Debug
   WriteTo:

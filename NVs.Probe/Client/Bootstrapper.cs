@@ -55,5 +55,10 @@ namespace NVs.Probe.Client
             logger.Information("Started process {@pid} for instance {@id}", process.Id, id);
             writeLine(id);
         }
+
+        public void Stop(string objInstanceId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

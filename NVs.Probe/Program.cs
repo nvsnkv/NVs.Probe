@@ -38,7 +38,7 @@ namespace NVs.Probe
             {
                 Log.Information("Starting host..");
                 var parser = new Parser(with => with.EnableDashDash = true);
-                var result = parser.ParseArguments<ServeArguments, DeployArguments>(args);
+                var result = parser.ParseArguments<ServeArguments, DeployArguments, StopArguments>(args);
                 result
                     .WithParsed((ServeArguments a) =>
                     {
@@ -46,15 +46,11 @@ namespace NVs.Probe
                     })
                     .WithParsed((DeployArguments a) =>
                     {
-                        if (a.Verbose)
-                        {
-                            Log.Logger = new LoggerConfiguration()
-                                .WriteTo.Logger(Log.Logger)
-                                .WriteTo.Console()
-                                .CreateLogger();
-                        }
-
                         new Bootstrapper(parser, Log.Logger, System.Console.WriteLine).Start(a.InstanceId, a.ConfigurationPath);
+                    })
+                    .WithParsed((StopArguments a) =>
+                    {
+                        new Bootstrapper(parser, Log.Logger, System.Console.WriteLine).Stop(a.InstanceId);
                     })
                     .WithNotParsed(err =>
                     {
