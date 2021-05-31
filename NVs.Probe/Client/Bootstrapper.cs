@@ -1,39 +1,56 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Pipes;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using CommandLine;
 using NVs.Probe.Configuration;
-using Serilog;
 
 namespace NVs.Probe.Client
 {
     internal sealed class Bootstrapper
     {
-        private readonly Parser parser;
-        private ILogger logger;
-        private readonly Action<string> writeLine;
-
-        public Bootstrapper(Parser parser, ILogger logger, Action<string> writeLine)
+        private readonly Parser argsParser;
+        private readonly IConsole console;
+        
+        public Bootstrapper(Parser argsParser, IConsole console)
         {
-            this.parser = parser ?? throw new ArgumentNullException(nameof(parser));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.writeLine = writeLine ?? throw new ArgumentNullException(nameof(writeLine));
+            this.argsParser = argsParser;
+            this.console = console ?? throw new ArgumentNullException(nameof(console));
         }
 
         public void Start(string id, string configPath)
         {
-            if (id == null) throw new ArgumentNullException(nameof(id));
-            if (configPath == null) throw new ArgumentNullException(nameof(configPath));
+            if (string.IsNullOrEmpty(id))
+            {
+                console.WriteError("Unable to deploy new instance of probe: no id provided!");
+                throw new ArgumentNullException(nameof(id));
+            }
 
-            logger.Debug("Building command line arguments...");
-            var args = parser.FormatCommandLine(new ServeArguments(configPath, id));
-            logger.Debug("Done!");
+            if (!File.Exists(configPath))
+            {
+                console.WriteError("Unable to deploy new instance of probe: configuration file does not exists, or inaccessible!");
+                throw new FileNotFoundException("Configuration file not found!", configPath);
+            }
 
-            logger.Debug("Creating the process...");
+            var path = GetExecutablePath();
+            var args = argsParser.FormatCommandLine(new ServeArguments(configPath, id));
+
+            var info = path.EndsWith(".dll") 
+                ? new ProcessStartInfo("dotnet", $"\"{path}\" {args}")
+                : new ProcessStartInfo(path, args);
+
+            var process = Process.Start(info);
+            if (process == null)
+            {
+                console.WriteError("Unable to deploy new instance of probe: failed to start process!");
+                throw new InvalidOperationException("Process instance was not created!");
+            }
+            
+            console.WriteLine(id);
+        }
+
+        private static string GetExecutablePath()
+        {
             var assembly = Assembly.GetCallingAssembly();
             if (assembly?.CodeBase == null)
             {
@@ -41,22 +58,10 @@ namespace NVs.Probe.Client
             }
 
             var path = new Uri(assembly.CodeBase).LocalPath;
-            var info = path.EndsWith(".dll") 
-                ? new ProcessStartInfo("dotnet", $"\"{path}\" {args}")
-                : new ProcessStartInfo(path, args);
-
-            logger.Debug("Attempting to start {@executable} with following args {@args}...", info.FileName, info.Arguments);
-            var process = Process.Start(info);
-            if (process == null)
-            {
-                throw new InvalidOperationException("Process instance was not created!");
-            }
-
-            logger.Information("Started process {@pid} for instance {@id}", process.Id, id);
-            writeLine(id);
+            return path;
         }
 
-        public void Stop(string objInstanceId)
+        public void Stop(string id)
         {
             throw new NotImplementedException();
         }

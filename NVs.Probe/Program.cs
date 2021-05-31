@@ -38,19 +38,23 @@ namespace NVs.Probe
             {
                 Log.Information("Starting host..");
                 var parser = new Parser(with => with.EnableDashDash = true);
-                var result = parser.ParseArguments<ServeArguments, DeployArguments, StopArguments>(args);
+                var result = parser.ParseArguments<ServeArguments, DeployArguments, StopArguments, StubArguments>(args);
                 result
                     .WithParsed((ServeArguments a) =>
                     {
-                        BuildHost(a).Run();
+                        BuildProbeHost(a).Run();
+                    })
+                    .WithParsed((StubArguments a) =>
+                    {
+                        BuildStubHost(a).Run();
                     })
                     .WithParsed((DeployArguments a) =>
                     {
-                        new Bootstrapper(parser, Log.Logger, System.Console.WriteLine).Start(a.InstanceId, a.ConfigurationPath);
+                        new Bootstrapper(parser, new ConsoleWrapper()).Start(a.InstanceId, a.ConfigurationPath);
                     })
                     .WithParsed((StopArguments a) =>
                     {
-                        new Bootstrapper(parser, Log.Logger, System.Console.WriteLine).Stop(a.InstanceId);
+                        new Bootstrapper(parser, new ConsoleWrapper()).Stop(a.InstanceId);
                     })
                     .WithNotParsed(err =>
                     {
@@ -73,8 +77,25 @@ namespace NVs.Probe
             }
         }
 
-        private static IHost BuildHost(ServeArguments args)
+        private static IHost BuildStubHost(StubArguments args)
         {
+            return new HostBuilder()
+                .ConfigureServices(services =>
+                {
+                    services.AddSingleton<IHostedService>(s => new Stub(s.GetService<ILogger<Stub>>()));
+                    services.AddSingleton(s => new PipeController(args.InstanceId, s.GetService<IHostedService>(), s.GetService<ILogger<PipeController>>()));
+                })
+                .UseSerilog()
+                .Build();
+        }
+
+        private static IHost BuildProbeHost(ServeArguments args)
+        {
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Logger(Log.Logger)
+                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} <s:{SourceContext}>{NewLine}{Exception}")
+                .CreateLogger();
+
             var configuration = args.GetConfiguration();
             return new HostBuilder()
                 .ConfigureServices(services =>

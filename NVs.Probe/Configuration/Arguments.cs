@@ -26,13 +26,24 @@ namespace NVs.Probe.Configuration
         }
     }
 
+    [Verb("stub")]
+    internal sealed class StubArguments
+    {
+        [Value(0, Required = false, HelpText = "An instance identifier for new instance of probe", Default = null)]
+        public string InstanceId { get; }
+
+        public StubArguments(string instanceId)
+        {
+            InstanceId = instanceId ?? Guid.NewGuid().ToString();
+        }
+    }
+
     [Verb("deploy")]
     internal sealed class DeployArguments
     {
         [Option('c', "configuration-path", HelpText = "A path to configuration file for new instance of probe", Required = true)]
         public string ConfigurationPath { get; }
 
-        [Value(0, Required = false, HelpText = "An instance identifier for new instance of probe", Default = null)]
         public string InstanceId { get; }
         
         public DeployArguments(string configurationPath, string instanceId)
