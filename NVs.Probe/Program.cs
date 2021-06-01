@@ -82,8 +82,12 @@ namespace NVs.Probe
             return new HostBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddSingleton<IHostedService>(s => new Stub(s.GetService<ILogger<Stub>>()));
-                    services.AddSingleton(s => new PipeController(args.InstanceId, s.GetService<IHostedService>(), s.GetService<ILogger<PipeController>>()));
+                    services.AddHostedService(s => new Stub(s.GetService<ILogger<Stub>>()));
+
+                    services.AddHostedService(s => new LifeTimeController(
+                        () => new ShutdownRequestListener(),
+                        s.GetService<IHostApplicationLifetime>(),
+                        s.GetService<ILogger<LifeTimeController>>()));
                 })
                 .UseSerilog()
                 .Build();
@@ -100,19 +104,24 @@ namespace NVs.Probe
             return new HostBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddSingleton<IHostedService>(s => new Server.Probe(
+                    services.AddHostedService(s => new Server.Probe(
                         configuration.ProbeOptions,
                         new Meter(
                             new ShellCommandRunner(configuration.RunnerOptions, 
-                            s.GetService<ILogger<ShellCommandRunner>>()), s.GetService<ILogger<Meter>>()),
+                            s.GetService<ILogger<ShellCommandRunner>>()), 
+                            s.GetService<ILogger<Meter>>()),
                         new MqttAdapter(configuration.MqttOptions.ClientOptions,
                             new MqttFactory(),
                             configuration.MqttOptions.RetryOptions,
-                            new MqttAnnounceBuilder(typeof(Program).Assembly, s.GetService<ILogger<MqttAnnounceBuilder>>()),
+                            new MqttAnnounceBuilder(typeof(Program).Assembly, 
+                                s.GetService<ILogger<MqttAnnounceBuilder>>()),
                             s.GetService<ILogger<MqttAdapter>>()),
                         s.GetService<ILogger<Server.Probe>>()));
 
-                    services.AddSingleton(s => new PipeController(args.InstanceId, s.GetService<IHostedService>(), s.GetService<ILogger<PipeController>>()));
+                    services.AddHostedService(s => new LifeTimeController(
+                        () => new ShutdownRequestListener(),
+                        s.GetService<IHostApplicationLifetime>(), 
+                        s.GetService<ILogger<LifeTimeController>>()));
                 })
                 .UseSerilog()
                 .Build();
