@@ -54,6 +54,8 @@ namespace NVs.Probe.Client
                 ? new ProcessStartInfo("dotnet", $"\"{path}\" {args}")
                 : new ProcessStartInfo(path, args);
 
+            info.UseShellExecute = true;
+
             console.WriteVerbose("Start info collected:");
             console.WriteVerbose($"  command: {info.FileName}");
             console.WriteVerbose($"  arguments: {info.Arguments}");
@@ -140,7 +142,7 @@ namespace NVs.Probe.Client
                 throw;
             }
 
-            console.WriteVerbose("Termination request successfully sent. Target instance will be terminated shortly. Have a nice day!");
+            console.WriteVerbose("Termination request successfully sent. Target instance will be terminated shortly.  Have a nice day!");
         }
     }
 }

@@ -45,7 +45,7 @@ namespace NVs.Probe.Client
                 return Response.Unknown;
             }
 
-            var response = (Response) buffer[1];
+            var response = (Response) buffer[0];
             console.WriteVerbose($"Pipe: {response} received.");
             return response;
         }

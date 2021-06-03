@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
 using Microsoft.Extensions.Configuration;
@@ -27,7 +28,7 @@ namespace NVs.Probe
 {
     internal static class Program
     {
-        private static int Main(string[] args)
+        private static async Task<int> Main(string[] args)
         {
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -41,6 +42,7 @@ namespace NVs.Probe
                 Log.Information("Starting host..");
                 var parser = new Parser(with => with.EnableDashDash = true);
                 var result = parser.ParseArguments<ServeArguments, DeployArguments, StopArguments, StubArguments>(args);
+                var task = Task.CompletedTask;
                 result
                     .WithParsed((ServeArguments a) =>
                     {
@@ -50,15 +52,15 @@ namespace NVs.Probe
                     {
                         BuildStubHost(a).Run();
                     })
-                    .WithParsed(async (DeployArguments a) =>
+                    .WithParsed((DeployArguments a) =>
                     {
                         var console = new ConsoleWrapper(a.Verbose);
-                        await new Bootstrapper(parser, console, new PipeClientBuilder(console).Build).Start(a.InstanceId, a.ConfigurationPath, a.Stub);
+                        task = new Bootstrapper(parser, console, new PipeClientBuilder(console).Build).Start(a.InstanceId, a.ConfigurationPath, a.Stub);
                     })
-                    .WithParsed(async (StopArguments a) =>
+                    .WithParsed((StopArguments a) =>
                     {
                         var console = new ConsoleWrapper(a.Verbose);
-                        await new Bootstrapper(parser, console, new PipeClientBuilder(console).Build).Stop(a.InstanceId);
+                        task = new Bootstrapper(parser, console, new PipeClientBuilder(console).Build).Stop(a.InstanceId);
                     })
                     .WithNotParsed(err =>
                     {
@@ -72,6 +74,7 @@ namespace NVs.Probe
                         Console.WriteLine(helpText);
                     });
 
+                await task;
                 return result.Tag == ParserResultType.Parsed ? 0 : 1;
             }
             catch (Exception e)
