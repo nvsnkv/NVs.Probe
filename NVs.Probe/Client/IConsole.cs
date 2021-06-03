@@ -7,5 +7,8 @@ namespace NVs.Probe.Client
         void WriteLine(string text);
 
         void WriteError(string text);
+
+        void WriteVerbose(string text);
+        void WriteWarning(string text);
     }
 }

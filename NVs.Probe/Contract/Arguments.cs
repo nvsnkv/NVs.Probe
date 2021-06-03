@@ -1,9 +1,10 @@
 ﻿using System;
 using CommandLine;
+using NVs.Probe.Configuration;
 
 // ReSharper disable ClassNeverInstantiated.Global
 
-namespace NVs.Probe.Configuration
+namespace NVs.Probe.Contract
 {
     [Verb("serve")]
     internal sealed class ServeArguments
@@ -44,11 +45,20 @@ namespace NVs.Probe.Configuration
         [Option('c', "configuration-path", HelpText = "A path to configuration file for new instance of probe", Required = true)]
         public string ConfigurationPath { get; }
 
+        [Value(0, Required = true, HelpText = "An identifier for new instance of probe", Default = null)]
         public string InstanceId { get; }
-        
-        public DeployArguments(string configurationPath, string instanceId)
+
+        [Option('v', "verbose", Required = false, Default = false, HelpText = "Enable verbose output")]
+        public bool Verbose { get; }
+
+        [Option('s', "stub", Required = false, Default = false, HelpText = "Deploy a dummy version of probe - useful for development and makes no sense in production")]
+        public bool Stub { get; }
+
+        public DeployArguments(string configurationPath, string instanceId, bool verbose, bool stub)
         {
             ConfigurationPath = configurationPath;
+            Verbose = verbose;
+            Stub = stub;
             InstanceId = instanceId ?? Guid.NewGuid().ToString();
         }
     }
@@ -59,9 +69,14 @@ namespace NVs.Probe.Configuration
         [Value(0, Required = true, HelpText = "An identifier of existing probe instance to stop", Default = null)]
         public string InstanceId { get; }
 
-        public StopArguments(string instanceId)
-        { 
+        [Option('v', "verbose", Required = false, Default = false, HelpText = "Enable verbose output")]
+        public bool Verbose { get; }
+
+
+        public StopArguments(string instanceId, bool verbose)
+        {
             InstanceId = instanceId;
+            Verbose = verbose;
         }
     }
 }

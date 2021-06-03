@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace NVs.Probe.Server
+namespace NVs.Probe.Server.Shutdown
 {
     internal sealed class LifeTimeController : IHostedService
     {

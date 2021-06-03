@@ -10,10 +10,12 @@ using Microsoft.Extensions.Logging;
 using MQTTnet;
 using NVs.Probe.Client;
 using NVs.Probe.Configuration;
+using NVs.Probe.Contract;
 using NVs.Probe.Execution;
 using NVs.Probe.Measuring;
 using NVs.Probe.Mqtt;
 using NVs.Probe.Server;
+using NVs.Probe.Server.Shutdown;
 using Serilog;
 using Serilog.Core;
 
@@ -48,13 +50,15 @@ namespace NVs.Probe
                     {
                         BuildStubHost(a).Run();
                     })
-                    .WithParsed((DeployArguments a) =>
+                    .WithParsed(async (DeployArguments a) =>
                     {
-                        new Bootstrapper(parser, new ConsoleWrapper()).Start(a.InstanceId, a.ConfigurationPath);
+                        var console = new ConsoleWrapper(a.Verbose);
+                        await new Bootstrapper(parser, console, new PipeClientBuilder(console).Build).Start(a.InstanceId, a.ConfigurationPath, a.Stub);
                     })
-                    .WithParsed((StopArguments a) =>
+                    .WithParsed(async (StopArguments a) =>
                     {
-                        new Bootstrapper(parser, new ConsoleWrapper()).Stop(a.InstanceId);
+                        var console = new ConsoleWrapper(a.Verbose);
+                        await new Bootstrapper(parser, console, new PipeClientBuilder(console).Build).Stop(a.InstanceId);
                     })
                     .WithNotParsed(err =>
                     {
@@ -85,7 +89,7 @@ namespace NVs.Probe
                     services.AddHostedService(s => new Stub(s.GetService<ILogger<Stub>>()));
 
                     services.AddHostedService(s => new LifeTimeController(
-                        () => new ShutdownRequestListener(),
+                        () => new ShutdownRequestListener(args.InstanceId, s.GetService<ILogger<ShutdownRequestListener>>()),
                         s.GetService<IHostApplicationLifetime>(),
                         s.GetService<ILogger<LifeTimeController>>()));
                 })
@@ -119,7 +123,7 @@ namespace NVs.Probe
                         s.GetService<ILogger<Server.Probe>>()));
 
                     services.AddHostedService(s => new LifeTimeController(
-                        () => new ShutdownRequestListener(),
+                        () => new ShutdownRequestListener(args.InstanceId, s.GetService<ILogger<ShutdownRequestListener>>()),
                         s.GetService<IHostApplicationLifetime>(), 
                         s.GetService<ILogger<LifeTimeController>>()));
                 })
