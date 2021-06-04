@@ -10,8 +10,8 @@
     <Description>Probe is cross-platform application that simplifies metrics collection and publishing. Designed to capture various system stats that can be captured via CLI and publish them to MQTT broker.</Description>
     <RepositoryUrl>https://github.com/nvsnkv/NVs.Probe</RepositoryUrl>
     <PackageTags>probe telemetry statistics</PackageTags>
-    <AssemblyVersion>0.2.0.0</AssemblyVersion>
-    <FileVersion>0.2.0.0</FileVersion>
+    <AssemblyVersion>0.3.0.0</AssemblyVersion>
+    <FileVersion>0.3.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
