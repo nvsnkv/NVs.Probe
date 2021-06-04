@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace NVs.Probe.Client
+﻿namespace NVs.Probe.Client
 {
     internal interface IConsole
     {
@@ -9,6 +7,7 @@ namespace NVs.Probe.Client
         void WriteError(string text);
 
         void WriteVerbose(string text);
+
         void WriteWarning(string text);
     }
 }

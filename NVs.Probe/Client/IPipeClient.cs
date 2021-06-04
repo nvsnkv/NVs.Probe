@@ -6,6 +6,6 @@ namespace NVs.Probe.Client
 {
     internal interface IPipeClient : IAsyncDisposable
     {
-        Task<Response> Send(Request request);
+        Task<Response?> Send(Request request);
     }
 }

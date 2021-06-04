@@ -3,7 +3,6 @@
   - Serilog.Sinks.File
   MinimumLevel: Debug
   WriteTo:
-  - Name: Console
   - Name: File
     Args:
       path: log.ndjson

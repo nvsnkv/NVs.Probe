@@ -45,7 +45,7 @@ namespace NVs.Probe.Contract
         [Option('c', "configuration-path", HelpText = "A path to configuration file for new instance of probe", Required = true)]
         public string ConfigurationPath { get; }
 
-        [Value(0, Required = true, HelpText = "An identifier for new instance of probe", Default = null)]
+        [Value(0, Required = false, HelpText = "An identifier for new instance of probe", Default = null)]
         public string InstanceId { get; }
 
         [Option('v', "verbose", Required = false, Default = false, HelpText = "Enable verbose output")]
@@ -54,11 +54,15 @@ namespace NVs.Probe.Contract
         [Option('s', "stub", Required = false, Default = false, HelpText = "Deploy a dummy version of probe - useful for development and makes no sense in production")]
         public bool Stub { get; }
 
-        public DeployArguments(string configurationPath, string instanceId, bool verbose, bool stub)
+        [Option('t', "connection-timeout", Required = false, Default = 300, HelpText = "Communications timeout (in milliseconds)")]
+        public long Timeout { get; }
+
+        public DeployArguments(string configurationPath, string instanceId, bool verbose, bool stub, long timeout)
         {
             ConfigurationPath = configurationPath;
             Verbose = verbose;
             Stub = stub;
+            Timeout = timeout;
             InstanceId = instanceId ?? Guid.NewGuid().ToString();
         }
     }
@@ -73,10 +77,15 @@ namespace NVs.Probe.Contract
         public bool Verbose { get; }
 
 
-        public StopArguments(string instanceId, bool verbose)
+        [Option('t', "connection-timeout", Required = false, Default = 300, HelpText = "Communications timeout (in milliseconds)")]
+        public long Timeout { get; }
+
+
+        public StopArguments(string instanceId, bool verbose, long timeout)
         {
             InstanceId = instanceId;
             Verbose = verbose;
+            Timeout = timeout;
         }
     }
 }

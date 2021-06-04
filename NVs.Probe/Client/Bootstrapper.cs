@@ -4,7 +4,6 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using CommandLine;
-using NVs.Probe.Configuration;
 using NVs.Probe.Contract;
 
 namespace NVs.Probe.Client
@@ -32,11 +31,7 @@ namespace NVs.Probe.Client
                 console.WriteWarning("Warning: Stub version of probe requested!");
             }
 
-            if (string.IsNullOrEmpty(id))
-            {
-                console.WriteError("Unable to deploy new instance of probe: no id provided!");
-                throw new ArgumentNullException(nameof(id));
-            }
+            await ValidateId(id);
 
             if (!File.Exists(configPath))
             {
@@ -44,11 +39,64 @@ namespace NVs.Probe.Client
                 throw new FileNotFoundException("Configuration file not found!", configPath);
             }
 
+            var process = StartNewProcess(id, configPath, runStub);
+            await Task.Delay(TimeSpan.FromSeconds(2));
+
+            await EnsureInstanceOnline(id, process);
+
+            console.WriteVerbose("Instance successfully started. Instance id is:");
+            console.WriteLine(id);
+
+            console.WriteVerbose("Have a nice day!");
+        }
+
+        private async Task EnsureInstanceOnline(string id, Process process)
+        {
+            var instanceOnline = true;
+            try
+            {
+                console.WriteVerbose("Attempting to connect to deployed instance...");
+                await using var client = createClient(id);
+                var response = await client.Send(Request.Ping);
+                console.WriteVerbose($"Newly deployed instance responded with {response}.");
+                if (response != Response.Pong)
+                {
+                    if (response.HasValue)
+                    {
+                        console.WriteError("Failed to verify deployed instance - instance returned unexpected response!");
+                        console.WriteVerbose($"Received response: {response.Value}");
+                    }
+                    else
+                    {
+                        console.WriteError("Unable to connect to deployed instance - timeout occurred!");
+                    }
+
+                    instanceOnline = false;
+                }
+            }
+            catch (Exception e)
+            {
+                console.WriteError("Unable to connect to deployed instance - exception occurred!");
+                console.WriteVerbose(e.ToString());
+                throw;
+            }
+
+            if (!instanceOnline)
+            {
+                console.WriteVerbose($"Killing process {process.Id}...");
+                process.Kill();
+                console.WriteVerbose("Request to terminate process sent.");
+                throw new InvalidOperationException("Unable to verify deployed instance!");
+            }
+        }
+
+        private Process StartNewProcess(string id, string configPath, bool runStub)
+        {
             console.WriteVerbose("Parameters verified, collecting details to start new process...");
             var path = GetExecutablePath();
             var args = runStub
-                    ? argsParser.FormatCommandLine(new StubArguments(id))
-                    : argsParser.FormatCommandLine(new ServeArguments(configPath, id));
+                ? argsParser.FormatCommandLine(new StubArguments(id))
+                : argsParser.FormatCommandLine(new ServeArguments(configPath, id));
 
             var info = path.EndsWith(".dll")
                 ? new ProcessStartInfo("dotnet", $"\"{path}\" {args}")
@@ -59,6 +107,7 @@ namespace NVs.Probe.Client
             console.WriteVerbose("Start info collected:");
             console.WriteVerbose($"  command: {info.FileName}");
             console.WriteVerbose($"  arguments: {info.Arguments}");
+            console.WriteVerbose($"  working dir: {info.WorkingDirectory}");
 
             console.WriteVerbose("Starting new instance...");
             var process = Process.Start(info);
@@ -68,35 +117,49 @@ namespace NVs.Probe.Client
                 throw new InvalidOperationException("Process instance was not created!");
             }
 
-            console.WriteVerbose($"Process {process.Id} stated. Waiting 2 seconds to give it some time to initialize server...");
-            await Task.Delay(TimeSpan.FromSeconds(2));
+            console.WriteVerbose(
+                $"Process {process.Id} stated. Waiting 2 seconds to give it some time to initialize server...");
+            return process;
+        }
 
+        private async Task ValidateId(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                console.WriteError("Unable to deploy new instance of probe: no id provided!");
+                throw new ArgumentNullException(nameof(id));
+            }
+
+            bool canProceed = true;
             try
             {
-                console.WriteVerbose("Attempting to connect to deployed instance...");
+                console.WriteVerbose("Checking if instance with this id is already deployed...");
                 await using var client = createClient(id);
                 var response = await client.Send(Request.Ping);
-                console.WriteVerbose($"Newly deployed instance responded with {response}.");
-                if (response != Response.Pong)
+                if (response == Response.Pong)
                 {
-                    console.WriteError("Failed to connect to deployed instance - instance returned unexpected response!");
-                    console.WriteVerbose($"Killing process {process.Id}...");
-                    process.Kill();
-                    console.WriteVerbose("Request to terminate process sent. Bootstrapper will be terminated now.");
-                    return;
+                    console.WriteError("Unable to deploy new instance of probe: instance with same id already exists!");
+                    canProceed = false;
+                }
+
+                if (response.HasValue)
+                {
+                    console.WriteError(
+                        "Unable to deploy new instance of probe: instance with same id (or another process which uses named pipe with the same name) exists!");
+                    console.WriteVerbose($"Response received: {response.Value}");
+                    canProceed = false;
                 }
             }
             catch (Exception e)
             {
-                console.WriteError("Unable to connect to deployed instance - exception occurred!");
+                console.WriteWarning("Unexpected error occurred while checking id availability!");
                 console.WriteVerbose(e.ToString());
-                throw;
             }
 
-            console.WriteVerbose("Instance successfully started. Instance id is:");
-            console.WriteLine(id);
-
-            console.WriteVerbose("Have a nice day!");
+            if (!canProceed)
+            {
+                throw new ArgumentException("Named pipe with this name already exists!", nameof(id));
+            }
         }
 
         private string GetExecutablePath()
