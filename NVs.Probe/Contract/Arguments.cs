@@ -6,7 +6,7 @@ using NVs.Probe.Configuration;
 
 namespace NVs.Probe.Contract
 {
-    [Verb("serve")]
+    [Verb("serve", HelpText = "Launch a new instance of probe and wait until it ended")]
     internal sealed class ServeArguments
     {
         [Option('c', "configuration-path", HelpText = "A path to configuration file for probe", Required = true)]
@@ -27,7 +27,7 @@ namespace NVs.Probe.Contract
         }
     }
 
-    [Verb("stub")]
+    [Verb("stub", HelpText = "Launch a probe with a dummy payload and wait until it ended. Useful for debugging, useless in production")]
     internal sealed class StubArguments
     {
         [Value(0, Required = false, HelpText = "An instance identifier for new instance of probe", Default = null)]
@@ -39,7 +39,7 @@ namespace NVs.Probe.Contract
         }
     }
 
-    [Verb("deploy")]
+    [Verb("deploy", HelpText = "Launch a probe in the new process and exit")]
     internal sealed class DeployArguments
     {
         [Option('c', "configuration-path", HelpText = "A path to configuration file for new instance of probe", Required = true)]
@@ -67,7 +67,7 @@ namespace NVs.Probe.Contract
         }
     }
 
-    [Verb("stop")]
+    [Verb("stop", HelpText = "Stop previously started instance")]
     internal sealed class StopArguments
     {
         [Value(0, Required = true, HelpText = "An identifier of existing probe instance to stop", Default = null)]
@@ -79,7 +79,6 @@ namespace NVs.Probe.Contract
 
         [Option('t', "connection-timeout", Required = false, Default = 1000, HelpText = "Communications timeout (in milliseconds)")]
         public long Timeout { get; }
-
 
         public StopArguments(string instanceId, bool verbose, long timeout)
         {

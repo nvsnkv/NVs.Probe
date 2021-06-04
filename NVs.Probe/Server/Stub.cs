@@ -35,7 +35,7 @@ namespace NVs.Probe.Server
             {
                 Console.Clear();
 
-                Console.WriteLine("PROBE - STUD");
+                Console.WriteLine("PROBE - DUMMY PAYLOAD");
                 Console.WriteLine($"  instance id: {instanceId}");
                 Console.WriteLine($"  command line: {Environment.CommandLine}");
                 Console.WriteLine($"  working directory: {Environment.CurrentDirectory}");
