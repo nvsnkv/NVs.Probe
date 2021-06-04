@@ -87,7 +87,7 @@ namespace NVs.Probe
             return new HostBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddHostedService(s => new Stub(s.GetService<ILogger<Stub>>()));
+                    services.AddHostedService(s => new Stub(args.InstanceId, s.GetService<ILogger<Stub>>()));
 
                     services.AddHostedService(s => new LifeTimeController(
                         () => new ShutdownRequestListener(args.InstanceId, s.GetService<ILogger<ShutdownRequestListener>>()),

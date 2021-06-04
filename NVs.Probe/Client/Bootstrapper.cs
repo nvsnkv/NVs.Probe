@@ -102,6 +102,7 @@ namespace NVs.Probe.Client
                 ? new ProcessStartInfo("dotnet", $"\"{path}\" {args}")
                 : new ProcessStartInfo(path, args);
 
+            info.WorkingDirectory = Environment.CurrentDirectory;
             info.UseShellExecute = true;
 
             console.WriteVerbose("Start info collected:");

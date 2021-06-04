@@ -54,7 +54,7 @@ namespace NVs.Probe.Contract
         [Option('s', "stub", Required = false, Default = false, HelpText = "Deploy a dummy version of probe - useful for development and makes no sense in production")]
         public bool Stub { get; }
 
-        [Option('t', "connection-timeout", Required = false, Default = 300, HelpText = "Communications timeout (in milliseconds)")]
+        [Option('t', "connection-timeout", Required = false, Default = 1900, HelpText = "Communications timeout (in milliseconds)")]
         public long Timeout { get; }
 
         public DeployArguments(string configurationPath, string instanceId, bool verbose, bool stub, long timeout)
@@ -77,7 +77,7 @@ namespace NVs.Probe.Contract
         public bool Verbose { get; }
 
 
-        [Option('t', "connection-timeout", Required = false, Default = 300, HelpText = "Communications timeout (in milliseconds)")]
+        [Option('t', "connection-timeout", Required = false, Default = 1000, HelpText = "Communications timeout (in milliseconds)")]
         public long Timeout { get; }
 
 

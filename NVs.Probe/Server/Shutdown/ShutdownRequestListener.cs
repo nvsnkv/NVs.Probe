@@ -11,7 +11,6 @@ namespace NVs.Probe.Server.Shutdown
     {
         private readonly string name;
         private readonly ILogger<ShutdownRequestListener> logger;
-        private readonly NamedPipeServerStream pipe;
         private readonly Task listener;
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
 
@@ -19,7 +18,6 @@ namespace NVs.Probe.Server.Shutdown
         {
             this.name = name ?? throw new ArgumentNullException(nameof(name));
             this.logger = logger;
-            pipe = new NamedPipeServerStream(name, PipeDirection.InOut);
             listener = Task.Factory.StartNew(Listen, cts.Token);
         }
 
@@ -31,6 +29,8 @@ namespace NVs.Probe.Server.Shutdown
                 while (!cts.IsCancellationRequested)
                 {
                     logger.LogDebug("Awaiting connection...");
+
+                    await using var pipe = new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte);
                     await pipe.WaitForConnectionAsync(cts.Token);
                     if (cts.IsCancellationRequested)
                     {
@@ -39,36 +39,38 @@ namespace NVs.Probe.Server.Shutdown
                     }
 
                     logger.LogDebug("Reading request");
-                    if (await pipe.ReadAsync(buffer, cts.Token) != 1)
+                    var bytesRed = await pipe.ReadAsync(buffer, cts.Token);
+                    if (bytesRed != 1)
                     {
                         logger.LogError("Failed to read byte from the pipe!");
-                        continue;
                     }
-
-                    if (cts.IsCancellationRequested)
+                    else
                     {
-                        logger.LogInformation("Cancellation requested.");
-                        return;
-                    }
-
-                    using (logger.BeginScope("{@request}", buffer[0]))
-                    {
-                        switch (buffer[0])
+                        if (cts.IsCancellationRequested)
                         {
-                            case (byte) Request.Ping:
-                                logger.LogDebug("Received ping request...");
-                                await Reply(Response.Pong);
-                                break;
+                            logger.LogInformation("Cancellation requested.");
+                            return;
+                        }
 
-                            case (byte) Request.Shutdown:
-                                logger.LogInformation("Received shutdown request.");
-                                RaiseShutdownRequested();
-                                await Reply(Response.Bye);
-                                break;
+                        using (logger.BeginScope("{@request}", buffer[0]))
+                        {
+                            switch (buffer[0])
+                            {
+                                case (byte)Request.Ping:
+                                    logger.LogDebug("Received ping request...");
+                                    await Reply(pipe, Response.Pong);
+                                    break;
 
-                            default:
-                                logger.LogWarning("Unknown request received");
-                                break;
+                                case (byte)Request.Shutdown:
+                                    logger.LogInformation("Received shutdown request.");
+                                    RaiseShutdownRequested();
+                                    await Reply(pipe, Response.Bye);
+                                    break;
+
+                                default:
+                                    logger.LogWarning("Unknown request received");
+                                    break;
+                            }
                         }
                     }
                 }
@@ -83,7 +85,7 @@ namespace NVs.Probe.Server.Shutdown
             logger.LogInformation("Notification sent.");
         }
 
-        private async Task Reply(Response response)
+        private async Task Reply(NamedPipeServerStream pipe, Response response)
         {
             using (logger.BeginScope("{@response}", response))
             {
@@ -91,14 +93,13 @@ namespace NVs.Probe.Server.Shutdown
                 await pipe.WriteAsync(new[] { (byte)response }, cts.Token);
                 logger.LogInformation("Response sent.");
             }
-            
+
         }
 
         public async ValueTask DisposeAsync()
         {
             cts.Cancel();
             await listener;
-            await pipe.DisposeAsync();
         }
 
         public event EventHandler ShutdownRequested;

@@ -37,14 +37,14 @@ namespace NVs.Probe.Client
             console.WriteVerbose("Pipe: Connecting...");
             if (await pipe.ConnectAsync(cts.Token).TimeoutAfter(timeout, cts.Token))
             {
-                console.WriteVerbose("Pipe: connection request timed out!");
+                console.WriteVerbose($"Pipe: connection request timed out !");
                 return null;
             };
             
             console.WriteVerbose("Pipe: Sending request...");
             if (await pipe.WriteAsync(buffer, cts.Token).TimeoutAfter(timeout, cts.Token))
             {
-                console.WriteVerbose("Pipe: data transfer timed out!");
+                console.WriteVerbose($"Pipe: data transfer timed out after {timeout}!");
                 return null;
             };
             
@@ -52,7 +52,7 @@ namespace NVs.Probe.Client
             var bytesRed = await pipe.ReadAsync(buffer, cts.Token).TimeoutAfter(timeout, cts.Token);
             if (!bytesRed.HasValue)
             {
-                console.WriteVerbose("Pipe: data transfer timed out!");
+                console.WriteVerbose($"Pipe: data transfer timed out after {timeout}!");
                 return null;
             }
 
