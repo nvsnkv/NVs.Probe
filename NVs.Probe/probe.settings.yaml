@@ -1,0 +1,20 @@
+﻿mqtt:
+  client_id: probe
+  broker: mqtt.local
+  user: mqtt_user
+  password: mqtt_password
+  retries_interval: "00:00:30"
+  retries_count: 5
+
+runner:
+  shell: sh
+  flags: "-c"
+  command_timeout: "00:00:02"
+
+metrics:
+  - topic: /probe/echo/1
+    command: echo 1
+  - topic: /probe/echo/2
+    command: echo 2
+
+inter_series_delay: "00:02:00"

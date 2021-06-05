@@ -1,14 +1,13 @@
 ﻿Serilog:
   Using:
-  - Serilog.Sinks.Console
   - Serilog.Sinks.File
   MinimumLevel: Debug
   WriteTo:
-  - Name: Console
   - Name: File
     Args:
       path: log.ndjson
       formatter: Serilog.Formatting.Compact.CompactJsonFormatter, Serilog.Formatting.Compact
+      shared: true
   Enrich:
   - FromLogContext
   - WithMachineName

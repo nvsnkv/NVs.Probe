@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace NVs.Probe.Measurements.CommandRunner
+namespace NVs.Probe.Execution
 {
     internal sealed class ShellCommandRunner : ICommandRunner
     {
@@ -14,13 +14,13 @@ namespace NVs.Probe.Measurements.CommandRunner
         private readonly int commandTimeout;
         private readonly ILogger<ShellCommandRunner> logger;
 
-        public ShellCommandRunner(RunnerOptions options, TimeSpan commandTimeout, ILogger<ShellCommandRunner> logger)
+        public ShellCommandRunner(RunnerOptions options, ILogger<ShellCommandRunner> logger)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
             this.shell = options.Shell;
             this.flags = options.Flags;
 
-            this.commandTimeout = (int)commandTimeout.TotalMilliseconds;
+            this.commandTimeout = (int)options.CommandTimeout.TotalMilliseconds;
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
         public async Task<string> Execute(string command, CancellationToken ct)

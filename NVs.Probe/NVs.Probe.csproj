@@ -10,8 +10,8 @@
     <Description>Probe is cross-platform application that simplifies metrics collection and publishing. Designed to capture various system stats that can be captured via CLI and publish them to MQTT broker.</Description>
     <RepositoryUrl>https://github.com/nvsnkv/NVs.Probe</RepositoryUrl>
     <PackageTags>probe telemetry statistics</PackageTags>
-    <AssemblyVersion>0.2.0.0</AssemblyVersion>
-    <FileVersion>0.2.0.0</FileVersion>
+    <AssemblyVersion>0.3.0.0</AssemblyVersion>
+    <FileVersion>0.3.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Colorful.Console" Version="1.2.15" />
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="MQTTnet" Version="3.0.15" />
@@ -34,11 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="probe.mqtt.yaml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </None>
-    <None Update="probe.metrics.yaml">
+    <None Update="probe.settings.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </None>

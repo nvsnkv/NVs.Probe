@@ -9,7 +9,7 @@ using Moq;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Options;
-using NVs.Probe.Measurements;
+using NVs.Probe.Measuring;
 using NVs.Probe.Metrics;
 using NVs.Probe.Mqtt;
 using Xunit;

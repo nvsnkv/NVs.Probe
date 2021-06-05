@@ -1,31 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NVs.Probe.Logging;
-using NVs.Probe.Measurements;
+using NVs.Probe.Measuring;
 using NVs.Probe.Metrics;
 using NVs.Probe.Mqtt;
 
-namespace NVs.Probe
+namespace NVs.Probe.Server
 {
-    internal sealed class Payload : IHostedService
+    internal sealed class Probe : IHostedService
     {
-        private readonly IList<MetricConfig> configs;
+        private readonly IReadOnlyList<MetricConfig> metrics;
         private readonly TimeSpan delay;
         private readonly IMeter meter;
         private readonly IMqttAdapter adapter;
-        private readonly ILogger<Payload> logger;
+        private readonly ILogger<Probe> logger;
 
         private CancellationTokenSource source;
 
-        public Payload(IEnumerable<MetricConfig> configs, TimeSpan delay, IMeter meter, IMqttAdapter adapter, ILogger<Payload> logger)
+        public Probe(ProbeOptions options, IMeter meter, IMqttAdapter adapter, ILogger<Probe> logger)
         {
-            this.configs = configs?.ToList() ?? throw new ArgumentNullException(nameof(configs));
-            this.delay = delay;
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            this.metrics = options.Metrics;
+            this.delay = options.InterSeriesDelay;
             this.meter = meter ?? throw new ArgumentNullException(nameof(meter));
             this.adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -37,7 +36,7 @@ namespace NVs.Probe
             try
             {
                 await adapter.Start(cancellationToken);
-                await adapter.Announce(configs, cancellationToken);
+                await adapter.Announce(metrics, cancellationToken);
 
                 source = new CancellationTokenSource();
                 var _ = Task.Factory.StartNew(async () =>
@@ -48,7 +47,7 @@ namespace NVs.Probe
                         {
                             logger.LogDebug("Measurement series started.");
 
-                            foreach (var config in configs)
+                            foreach (var config in metrics)
                             {
                                 using (logger.BeginScope("Config: {@config}", config))
                                 {

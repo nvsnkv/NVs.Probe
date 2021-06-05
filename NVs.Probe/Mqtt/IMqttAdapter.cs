@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using NVs.Probe.Measurements;
+using NVs.Probe.Measuring;
 using NVs.Probe.Metrics;
 
 namespace NVs.Probe.Mqtt 
