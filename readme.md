@@ -5,7 +5,7 @@ Probe is cross-platform application that simplifies metrics collection and publi
 
 # Usage
 Grab the binary you need from the [releases](https://github.com/nvsnkv/NVs.Probe/releases) page, copy it to the location you need, update the configuration and run it!
-If the binaries posted on releases page does not work for you, [development notes](#developmen-notes) at the end of this readme will help to build the Probe from the source code.
+If the binaries posted on releases page does not work for you, [development notes](#development-notes) at the end of this readme will help to build the Probe from the source code.
 
 ## Configuration
 Probe reads configuration file  (`-c` option) to retrieve its setup. Sample file content can be found below:
