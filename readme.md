@@ -4,19 +4,10 @@ Probe is cross-platform application that simplifies metrics collection and publi
 * No custom telemetry protocol - Probe uses MQTT to publish measurement results. That allows you to connect Probe with you smart home infrastructure and setup as complex monitoring and automation as you wish.
 
 # Usage
-## Building
-### linux-arm
-The steps below will help to build Probe for ARM-based Linux host, such as Raspberry Pi:
-1. run `dotnet publish NVs.Probe\NVs.Probe.csproj /p:PublishProfile=Linux_arm`;
-1. copy files from `publish/linux-arm` to the target machine.
-### windows-x64
-1. run `dotnet publish NVs.Probe\NVs.Probe.csproj /p:PublishProfile=Win_x64`;
-1. copy files from `publish/win-x64` to the target machine.
-### Other runtimes
-Application is runtime-agnostic by itself and can be compiled for any runtime supported by .Net Core by specifying `runtime (-r)`  argument for `dotnet build` or `dotnet publish`
+Grab the binary you need from the [releases](https://github.com/nvsnkv/NVs.Probe/releases) page, copy it to the location you need, update the configuration and run it!
+If the binaries posted on releases page does not work for you, [development notes](#developmen-notes) at the end of this readme will help to build the Probe from the source code.
 
-## Running the app
-### Updating configuration file
+## Configuration
 Probe reads configuration file  (`-c` option) to retrieve its setup. Sample file content can be found below:
 ```
 mqtt:
@@ -38,13 +29,13 @@ metrics:
 [!] Configuration file contains password for MQTT broker in it, so please ensure the access to this file is properly restricted!
 
 Configuration file consist of 3 required groups - MQTT configuration, Command Runner setup and the list of metrics.
-#### Metrics configuration (mertics)
+### Metrics configuration (mertics)
 Metrics are configured as a pairs of MQTT topic and CLI command associated with it:
 * `topic` - string, required. Defines MQTT topic that will be used to publish values;
 * `command` - string, required. Defines CLI command that Probe will run to measure metric value.
 
 In addition to the sequence of metrics optional `inter_series_delay` parameter can be used to adjust time interval between two series of measurements. Default is "00:02:00", 2 minutes.
-#### MQTT Connection setup (mqtt)
+### MQTT Connection setup (mqtt)
 Following parameters are required:
 * `client_id` - string, MQTT Client Identifier;
 * `broker` - string, the hostname or IP address of MQTT broker;
@@ -55,7 +46,7 @@ Following parameters are optional:
 * `port` - interger, port number of MQTT broker. Default is 1883;
 * `retries_count` - integer, count of attempts to reconnect to MQTT broker in case of connectivity issues. Application would not try to reconnect if this parameter is not provided. `retries_interval` must be provided together with this setting. If defined, the value should be positive;
 * `retries_interval` - TimeSpan. Base interval between attempts to reconnect to MQTT broker. Must be defined if `retries_count` is set. Must not be defined otherwise.
-#### Runner configuration (runner)
+### Runner configuration (runner)
 Runner configuration allows to define which interpreter will be used to run the metrics and what would be a command timeout. Following parameter is required:
 * `shell` - string, required. Interpreter to use for measurements. Can be any application that receives command as command line arguments.
 Following parameters are optional
@@ -63,7 +54,7 @@ Following parameters are optional
 Some interpreters does not requre it (`powershell 'echo 1'`);
 * `command_timeout` - TimeSpan, optional. Command timeout. Default is "00:00:02".
 
-### Starting the Probe
+## Starting the Probe
 The recommended way is to start new application using `deploy` verb - it will launch a separate process without blocking initial one:
 ```
 probe deploy -c probe.settings.yaml my_probe
@@ -72,9 +63,8 @@ Use `stop` verb to terminate a host:
 ```
 probe stop my_probe
 ```
-
-#### Command line options
-##### Serve
+### Command line options
+#### Serve
 Command `serve` is used to start the Probe. The process will establish connection to MQTT broker and start reporting measured metric values in accordance with configuration from configuration file.
 The command has two required parameters:
 * `-c`, `--configuration-path` - a path to configuration file
@@ -82,8 +72,7 @@ The command has two required parameters:
 
 Example:
 `probe serve -c probe.settings.yaml -i my_probe`
-
-##### Deploy
+#### Deploy
 Like `serve`, `deploy` command is used to start the Probe. But unlike `serve`, `deploy` starts new instance of Probe in a separate process and then exits.
 Following parameter is required:
 * `-c`, `--configuration-path` - a path to configuration file for new instance
@@ -96,22 +85,31 @@ By default, `deploy` will generate a random and creepy instance id for newly cre
 ```
 probe deploy -c probe.settings.yaml my_awesome_instance_id
 ```
-
-##### Stop
+#### Stop
 No surprises here - `stop` just stops previosly deployed instance of Probe.
 This command needs an instance id to stop - it needs to be passed as an additional argument:
 ```
 probe stop my_awesome_instance_id
 ```
 `stop` also accepts optional `--verbose` amd `--connection-timeout` with the same behavior as for `deploy`
-
-##### Stub
+#### Stub
 A command that was created to debug `deploy` and `stop` commands. Useful for development, but makes no sense in production.
 
 ## Logging
 Applicaion uses [Serilog](https://serilog.net/) to produce logs. Logging configuration is set up in `probe.serilog.logging.yaml` file.
 
 # Development notes
+## Building
+### linux-arm
+The steps below will help to build Probe for ARM-based Linux host, such as Raspberry Pi:
+1. run `dotnet publish NVs.Probe\NVs.Probe.csproj /p:PublishProfile=Linux_arm`;
+1. copy files from `publish/linux-arm` to the target machine.
+### windows-x64
+1. run `dotnet publish NVs.Probe\NVs.Probe.csproj /p:PublishProfile=Win_x64`;
+1. copy files from `publish/win-x64` to the target machine.
+### Other runtimes
+Application is runtime-agnostic by itself and can be compiled for any runtime supported by .Net Core by specifying `runtime (-r)`  argument for `dotnet build` or `dotnet publish`
+
 ## Automated tests
 There are few tests that helped me to write this tool.
 Some of them tests .Net components and can be started from any supported runtime.
