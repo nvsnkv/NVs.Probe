@@ -1,1 +1,0 @@
-./probe -c '' -b '' -u '' -p '' -i sh --interpeter-flags=-c -m probe.metrics.yaml

@@ -8,7 +8,6 @@ Probe is cross-platform application that simplifies metrics collection and publi
 ### linux-arm
 The steps below will help to build Probe for ARM-based Linux host, such as Raspberry Pi:
 1. run `dotnet publish NVs.Probe\NVs.Probe.csproj /p:PublishProfile=Linux_arm`;
-1. copy files from `install/linux` to `publish/linux-arm`;
 1. copy files from `publish/linux-arm` to the target machine.
 ### windows-x64
 1. run `dotnet publish NVs.Probe\NVs.Probe.csproj /p:PublishProfile=Win_x64`;
