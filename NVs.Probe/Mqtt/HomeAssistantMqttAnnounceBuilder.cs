@@ -11,12 +11,12 @@ using NVs.Probe.Metrics;
 
 namespace NVs.Probe.Mqtt
 {
-    class MqttAnnounceBuilder : IMqttAnnounceBuilder
+    class HomeAssistantMqttAnnounceBuilder : IMqttAnnounceBuilder
     {
         private readonly Assembly assembly;
-        private readonly ILogger<MqttAnnounceBuilder> logger;
+        private readonly ILogger<HomeAssistantMqttAnnounceBuilder> logger;
 
-        public MqttAnnounceBuilder(Assembly assembly, ILogger<MqttAnnounceBuilder> logger)
+        public HomeAssistantMqttAnnounceBuilder(Assembly assembly, ILogger<HomeAssistantMqttAnnounceBuilder> logger)
         {
             this.assembly = assembly ?? throw new ArgumentNullException(nameof(assembly));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -59,6 +59,8 @@ namespace NVs.Probe.Mqtt
                             state_topic = config.Metric.Topic,
                             name = config.Metric.Topic.Split('/').Last(),
                             unique_id = uniqueId,
+                            force_update = true,
+
                             device
                         };
                         var message = new MqttApplicationMessageBuilder()

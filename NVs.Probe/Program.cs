@@ -118,8 +118,8 @@ namespace NVs.Probe
                         new MqttAdapter(configuration.MqttOptions.ClientOptions,
                             new MqttFactory(),
                             configuration.MqttOptions.RetryOptions,
-                            new MqttAnnounceBuilder(typeof(Program).Assembly, 
-                                s.GetService<ILogger<MqttAnnounceBuilder>>()),
+                            new HomeAssistantMqttAnnounceBuilder(typeof(Program).Assembly, 
+                                s.GetService<ILogger<HomeAssistantMqttAnnounceBuilder>>()),
                             s.GetService<ILogger<MqttAdapter>>()),
                         s.GetService<ILogger<Server.Probe>>()));
 
