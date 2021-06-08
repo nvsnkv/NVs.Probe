@@ -17,6 +17,7 @@ namespace NVs.Probe.Configuration
         {
             string topic = null;
             string command = null;
+            string unit = null;
 
             if (!parser.TryConsume<MappingStart>(out _))
             {
@@ -34,6 +35,10 @@ namespace NVs.Probe.Configuration
 
                     case nameof(command):
                         command = parser.Consume<Scalar>().Value;
+                        break;
+
+                    case "unit_of_measurement":
+                        unit = parser.Consume<Scalar>().Value;
                         break;
                 }
             }
@@ -55,7 +60,7 @@ namespace NVs.Probe.Configuration
                     $"Unable to build metric configuration - topic was not defined for command '{command}'");
             }
 
-            return new MetricConfig(new Metric(topic), command);
+            return new MetricConfig(new Metric(topic, unit), command);
         }
 
         public void WriteYaml(IEmitter emitter, object value, Type type)
