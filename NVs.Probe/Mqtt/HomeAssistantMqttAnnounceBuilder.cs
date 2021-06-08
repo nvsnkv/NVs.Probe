@@ -60,9 +60,9 @@ namespace NVs.Probe.Mqtt
                             name = config.Metric.Topic.Split('/').Last(),
                             unique_id = uniqueId,
                             force_update = true,
-
-                            device
+                            device_class = (config as HomeAssistantMetricConfig)?.DeviceClass
                         };
+
                         var message = new MqttApplicationMessageBuilder()
                             .WithTopic($"homeassistant/sensor/probe/{uniqueId}/config")
                             .WithPayload(JsonConvert.SerializeObject(payload))

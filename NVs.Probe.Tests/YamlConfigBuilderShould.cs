@@ -1,8 +1,10 @@
 using System;
+using System.Linq;
 using System.Text;
 using FluentAssertions;
 using MQTTnet.Client.Options;
 using NVs.Probe.Configuration;
+using NVs.Probe.Metrics;
 using Xunit;
 
 namespace NVs.Probe.Tests
@@ -68,6 +70,26 @@ namespace NVs.Probe.Tests
             options.Shell.Should().BeEquivalentTo(shell);
             options.Flags.Should().BeEquivalentTo(flags);
             options.CommandTimeout.Should().Be(timeout);
+        }
+
+        [Fact, Trait("Category", "Win"), Trait("Category", "Linux")]
+        public void CreateHomeAssistantMetricConfigIfDeviceClassIsSet()
+        {
+            var options = new YamlConfigBuilder().Build("probe.settings.yaml").ProbeOptions;
+            var metrics = options.Metrics;
+
+            var firstMetric = metrics.First();
+            var secondMetric = metrics.Skip(1).First();
+
+            firstMetric.Should().BeOfType<MetricConfig>();
+            secondMetric.Should().BeOfType<HomeAssistantMetricConfig>();
+
+            var haConfig = secondMetric as HomeAssistantMetricConfig;
+            // ReSharper disable once PossibleNullReferenceException
+            haConfig.DeviceClass.Should().BeEquivalentTo("temperature");
+            haConfig.Metric.UnitOfMeasurement.Should().BeEquivalentTo("°C");
+
+
         }
     }
 }

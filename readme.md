@@ -35,6 +35,15 @@ Metrics are configured as a pairs of MQTT topic and CLI command associated with 
 * `command` - string, required. Defines CLI command that Probe will run to measure metric value.
 
 In addition to the sequence of metrics optional `inter_series_delay` parameter can be used to adjust time interval between two series of measurements. Default is "00:02:00", 2 minutes.
+
+Probe supports [Home Assistant MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/) out of the box.
+Once connected to the the broker, Probe publishes a discovery topic that allows Home Assistant to create a device representation for this instance.
+Every metric is available as an attribute of this device.
+
+In addition to `topic` and `command` attributes which are requrid to build the metric, Probe also supports following optional attributes:
+* `unit_of_measurement` - string that defines unit of measurement for the metric. This information is getting sent to Home Assistant in diccovery topic to tweak appearance of the attribute;
+* `ha_devise_class` - string that defines a [device class](https://www.home-assistant.io/integrations/sensor/#device-class) for the metric. Setting this similar to `unit_of_measurement`, this attribute is used to improve usability of this attribute in Home Assistant.
+
 ### MQTT Connection setup (mqtt)
 Following parameters are required:
 * `client_id` - string, MQTT Client Identifier;

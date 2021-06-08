@@ -2,7 +2,7 @@
 
 namespace NVs.Probe.Metrics
 {
-    internal sealed class MetricConfig
+    internal class MetricConfig
     {
         public MetricConfig(Metric metric, string command)
         {
@@ -13,5 +13,15 @@ namespace NVs.Probe.Metrics
         public Metric Metric { get; }
 
         public string Command { get; }
+    }
+
+    internal sealed class HomeAssistantMetricConfig : MetricConfig
+    {
+        public string DeviceClass { get; }
+
+        public HomeAssistantMetricConfig(Metric metric, string command, string deviceClass) : base(metric, command)
+        {
+            DeviceClass = deviceClass;
+        }
     }
 }

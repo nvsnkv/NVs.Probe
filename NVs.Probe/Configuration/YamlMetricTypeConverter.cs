@@ -18,6 +18,7 @@ namespace NVs.Probe.Configuration
             string topic = null;
             string command = null;
             string unit = null;
+            string deviceClass = null;
 
             if (!parser.TryConsume<MappingStart>(out _))
             {
@@ -40,6 +41,10 @@ namespace NVs.Probe.Configuration
                     case "unit_of_measurement":
                         unit = parser.Consume<Scalar>().Value;
                         break;
+
+                    case "ha_device_class":
+                        deviceClass = parser.Consume<Scalar>().Value;
+                        break;
                 }
             }
 
@@ -60,7 +65,9 @@ namespace NVs.Probe.Configuration
                     $"Unable to build metric configuration - topic was not defined for command '{command}'");
             }
 
-            return new MetricConfig(new Metric(topic, unit), command);
+            return string.IsNullOrEmpty(deviceClass) 
+                ? new MetricConfig(new Metric(topic, unit), command)
+                : new HomeAssistantMetricConfig(new Metric(topic,unit), command, deviceClass);
         }
 
         public void WriteYaml(IEmitter emitter, object value, Type type)

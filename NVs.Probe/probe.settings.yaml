@@ -16,5 +16,7 @@ metrics:
     command: echo 1
   - topic: /probe/echo/2
     command: echo 2
+    unit_of_measurement: '°C'
+    ha_device_class: 'temperature'
 
 inter_series_delay: "00:02:00"
