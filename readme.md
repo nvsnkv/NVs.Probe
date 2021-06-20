@@ -51,7 +51,7 @@ Runner configuration allows to define which interpreter will be used to run the 
 * `shell` - string, required. Interpreter to use for measurements. Can be any application that receives command as command line arguments.
 
 Following parameters are optional
-* `flags` - string, optional. Interpreter flags. Should be used if interpreter does not execute commands from command line parameters by default. Some interpreters requires special flags to be provided to treat remaining command line as a command to execute (`sh -c 'echo 1'` or `cmd /c 'echo 1'` ).
+* `flags` - string, optional. Interpreter flags. Should be used if interpreter does not execute commands from command line parameters by default. Some interpreters require special flags to be provided to treat remaining command line args as a command to execute (`sh -c 'echo 1'` or `cmd /c 'echo 1'` ).
 Some interpreters does not requre it (`powershell 'echo 1'`);
 * `command_timeout` - TimeSpan, optional. Command timeout. Default is "00:00:02".
 
@@ -92,7 +92,7 @@ This command needs an instance id to stop - it needs to be passed as an addition
 ```
 probe stop my_awesome_instance_id
 ```
-`stop` also accepts optional `--verbose` amd `--connection-timeout` with the same behavior as for `deploy`
+`stop` also accepts optional `--verbose` and `--connection-timeout` arguments with the same behavior as for `deploy`
 #### Stub
 A command that was created to debug `deploy` and `stop` commands. Useful for development, but makes no sense in production.
 
@@ -113,7 +113,7 @@ Application is runtime-agnostic by itself and can be compiled for any runtime su
 
 ## Automated tests
 There are few tests that helped me to write this tool.
-Some of them tests .Net components and can be started from any supported runtime.
-Tests with "Category" equals to "Windows" will work on Windows hosts. Tests with "Linux" "Category" works on linux machines.
+Some of them tests .NET components and can be started from any supported runtime. And some of them were used to check interop with CLI on a specific OSes.
+Tests with "Category" equals to "Windows" will work on Windows hosts. Tests with "Linux" "Category" work on linux machines.
 `NVs.Probe.Tests\Dockerfile` was created to facilitate execution of Linux-specific tests on Windows hosts.
-Command ` docker build --no-cache -f .\NVs.Probe.Tests\Dockerfile .` executed from solution root will build this container. Execution of Linux-specific tests is a part of the build.
+Command ` docker build --no-cache -f .\NVs.Probe.Tests\Dockerfile .` executed from solution root will build this container. Execution of Linux-specific tests is a part of the build for this container.
