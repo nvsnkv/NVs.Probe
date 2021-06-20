@@ -49,6 +49,7 @@ Following parameters are optional:
 ### Runner configuration (runner)
 Runner configuration allows to define which interpreter will be used to run the metrics and what would be a command timeout. Following parameter is required:
 * `shell` - string, required. Interpreter to use for measurements. Can be any application that receives command as command line arguments.
+
 Following parameters are optional
 * `flags` - string, optional. Interpreter flags. Should be used if interpreter does not execute commands from command line parameters by default. Some interpreters requires special flags to be provided to treat remaining command line as a command to execute (`sh -c 'echo 1'` or `cmd /c 'echo 1'` ).
 Some interpreters does not requre it (`powershell 'echo 1'`);
