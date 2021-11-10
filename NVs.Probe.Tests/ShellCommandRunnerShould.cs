@@ -17,7 +17,7 @@ namespace NVs.Probe.Tests
         public async Task InvokeWindowsCommandsWithPipingSupport()
         {
             var command = "echo 'abc def' | sls 'abc'";
-            var runner = new ShellCommandRunner(new RunnerOptions("powershell", "", TimeSpan.FromMilliseconds(1000)), logger.Object);
+            var runner = new ShellCommandRunner(new RunnerOptions("powershell", "", TimeSpan.FromMilliseconds(10000)), logger.Object);
             var output = await runner.Execute(command, CancellationToken.None);
 
             output.Should().BeEquivalentTo("abc def");
