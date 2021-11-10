@@ -165,15 +165,13 @@ namespace NVs.Probe.Client
 
         private string GetExecutablePath()
         {
-            var assembly = Assembly.GetCallingAssembly();
-            if (assembly?.Location == null)
+            if (AppContext.BaseDirectory == null)
             {
                 console.WriteError("Unable to deploy new instance of probe: unable to locate assembly!");
                 throw new InvalidOperationException("Failed to identify calling assembly!");
             }
 
-            var path = new Uri(assembly.Location).LocalPath;
-            return path;
+            return AppContext.BaseDirectory;
         }
 
         public async Task Stop(string id)
