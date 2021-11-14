@@ -26,11 +26,11 @@ namespace NVs.Probe.Tests
         [Fact, Trait("Category", "Linux")]
         public async Task InvokeLinuxCommandsWithPipingSupport()
         {
-            var command = "ps -ax | grep ps";
+            var command = @"dotnet --info | grep "".NET SDKs""";
             var runner = new ShellCommandRunner(new RunnerOptions("sh", "-c", TimeSpan.FromMilliseconds(1000)), logger.Object);
             var output = await runner.Execute(command, CancellationToken.None);
 
-            output.Should().EndWith(" ps");
+            output.Should().EndWith(" installed:");
         }
     }
 }

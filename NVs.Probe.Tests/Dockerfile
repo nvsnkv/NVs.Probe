@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:3.1
+FROM mcr.microsoft.com/dotnet/sdk:6.0
 WORKDIR /src
 COPY ["NVs.Probe.Tests/NVs.Probe.Tests.csproj", "NVs.Probe.Tests/"]
 COPY ["NVs.Probe/NVs.Probe.csproj", "NVs.Probe/"]
