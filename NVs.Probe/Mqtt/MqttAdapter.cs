@@ -64,7 +64,15 @@ namespace NVs.Probe.Mqtt
                         var delay = retryOptions.Interval * retriesCount;
                         logger.LogInformation($"Attempting to reconnect in {delay} ({retriesCount} out of {retryOptions.RetriesCount})");
                         await Task.Delay(delay, internalCancellationTokenSource.Token);
-                        await Connect(internalCancellationTokenSource.Token);
+
+                        try
+                        {
+                            await Connect(internalCancellationTokenSource.Token);
+                        }
+                        catch (Exception e)
+                        {
+                            logger.LogError(e, "Failed to reconnect!");
+                        }
                     }
                     else
                     {
