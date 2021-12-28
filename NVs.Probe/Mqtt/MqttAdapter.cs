@@ -54,35 +54,33 @@ namespace NVs.Probe.Mqtt
                 logger.LogInformation("Client got disconnected from the server due to following reason: {@reason}", arg.Reason);
             }
 
-            if (arg.Reason != MqttClientDisconnectReason.NormalDisconnection || arg.Exception != null)
+            
+            if (retryOptions.ShouldRetry)
             {
-                if (retryOptions.ShouldRetry)
+                retriesCount++;
+                if (retriesCount < retryOptions.RetriesCount)
                 {
-                    retriesCount++;
-                    if (retriesCount < retryOptions.RetriesCount)
-                    {
-                        var delay = retryOptions.Interval * retriesCount;
-                        logger.LogInformation($"Attempting to reconnect in {delay} ({retriesCount} out of {retryOptions.RetriesCount})");
-                        await Task.Delay(delay, internalCancellationTokenSource.Token);
+                    var delay = retryOptions.Interval * retriesCount;
+                    logger.LogInformation($"Attempting to reconnect in {delay} ({retriesCount} out of {retryOptions.RetriesCount})");
+                    await Task.Delay(delay, internalCancellationTokenSource.Token);
 
-                        try
-                        {
-                            await Connect(internalCancellationTokenSource.Token);
-                        }
-                        catch (Exception e)
-                        {
-                            logger.LogError(e, "Failed to reconnect!");
-                        }
-                    }
-                    else
+                    try
                     {
-                        logger.LogError("Maximum retry attempts count reached, connection won't be restored automatically!");
+                        await Connect(internalCancellationTokenSource.Token);
+                    }
+                    catch (Exception e)
+                    {
+                        logger.LogError(e, "Failed to reconnect!");
                     }
                 }
                 else
                 {
-                    logger.LogWarning("Retry is not configured, connection won't be restored automatically!");
+                    logger.LogError("Maximum retry attempts count reached, connection won't be restored automatically!");
                 }
+            }
+            else
+            {
+                logger.LogWarning("Retry is not configured, connection won't be restored automatically!");
             }
         }
 
