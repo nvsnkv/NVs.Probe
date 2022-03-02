@@ -67,6 +67,7 @@ namespace NVs.Probe.Mqtt
                     try
                     {
                         await Connect(internalCancellationTokenSource.Token);
+                        retriesCount = 0;
                     }
                     catch (Exception e)
                     {

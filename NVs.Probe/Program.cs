@@ -102,7 +102,7 @@ namespace NVs.Probe
         {
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.Logger(Log.Logger)
-                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} <s:{SourceContext}>{NewLine}{Exception}")
+                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] <s:{Scope}> {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
 
             var configuration = args.GetConfiguration();
