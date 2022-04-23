@@ -5,7 +5,7 @@ Probe is cross-platform application that simplifies metrics collection and publi
 
 # Usage
 Grab the binary you need from the [releases](https://github.com/nvsnkv/NVs.Probe/releases) page, copy it to the location you need, update the configuration and run it!
-If the binaries posted on releases page does not work for you, [development notes](#development-notes) at the end of this readme will help to build the Probe from the source code.
+If the binaries posted on releases page do not work for you, [development notes](#development-notes) at the end of this readme will help to build the Probe from the source code.
 
 ## Configuration
 Probe reads configuration file  (`-c` option) to retrieve its setup. Sample file content can be found below:
@@ -28,7 +28,7 @@ metrics:
 ```
 [!] Configuration file contains password for MQTT broker in it, so please ensure the access to this file is properly restricted!
 
-Configuration file consist of 3 required groups - MQTT configuration, Command Runner setup and the list of metrics.
+Configuration file consists of 3 required groups - MQTT configuration, Command Runner setup and the list of metrics.
 ### Metrics configuration (mertics)
 Metrics are configured as a pairs of MQTT topic and CLI command associated with it:
 * `topic` - string, required. Defines MQTT topic that will be used to publish values;
@@ -52,7 +52,7 @@ Runner configuration allows to define which interpreter will be used to run the 
 
 Following parameters are optional
 * `flags` - string, optional. Interpreter flags. Should be used if interpreter does not execute commands from command line parameters by default. Some interpreters require special flags to be provided to treat remaining command line args as a command to execute (`sh -c 'echo 1'` or `cmd /c 'echo 1'` ).
-Some interpreters does not requre it (`powershell 'echo 1'`);
+Some interpreters do not requre it (`powershell 'echo 1'`);
 * `command_timeout` - TimeSpan, optional. Command timeout. Default is "00:00:02".
 
 ## Starting the Probe
