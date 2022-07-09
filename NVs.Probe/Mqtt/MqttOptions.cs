@@ -1,16 +1,16 @@
-﻿using MQTTnet.Client.Options;
+﻿using MQTTnet.Client;
 
 namespace NVs.Probe.Mqtt
 {
     internal class MqttOptions 
     {
-        public MqttOptions(IMqttClientOptions clientOptions, RetryOptions retryOptions)
+        public MqttOptions(MqttClientOptions clientOptions, RetryOptions retryOptions)
         {
             ClientOptions = clientOptions;
             RetryOptions = retryOptions;
         }
 
-        public IMqttClientOptions ClientOptions { get; }
+        public MqttClientOptions ClientOptions { get; }
 
         public RetryOptions RetryOptions { get; }
     }

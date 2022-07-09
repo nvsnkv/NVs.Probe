@@ -37,7 +37,7 @@ namespace NVs.Probe.Measuring
                 }
                 catch (Exception e)
                 {
-                    logger.LogError(e, $"Failed to measure {config.Metric.Topic} !");
+                    logger.LogError(e, "Failed to measure {topic} !", config.Metric.Topic);
                     return new FailedMeasurement(config.Metric, e);
                 }
             }

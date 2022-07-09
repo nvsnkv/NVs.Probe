@@ -11,7 +11,7 @@ namespace NVs.Probe.Client
         private readonly string name;
         private readonly TimeSpan timeout;
         private readonly IConsole console;
-        private readonly CancellationTokenSource cts = new CancellationTokenSource();
+        private readonly CancellationTokenSource cts = new();
         private readonly NamedPipeClientStream pipe;
 
         public PipeClient(string name, TimeSpan timeout, IConsole console)

@@ -14,8 +14,8 @@ namespace NVs.Probe.Tests
 {
     public sealed class MeterShould
     {
-        private readonly Mock<ILogger<Meter>> logger = new Mock<ILogger<Meter>>();
-        private readonly Mock<ICommandRunner> runner = new Mock<ICommandRunner>();
+        private readonly Mock<ILogger<Meter>> logger = new();
+        private readonly Mock<ICommandRunner> runner = new();
 
         [Fact, Trait("Category", "Win"), Trait("Category", "Linux")]
         public async Task ProvideResultsForSuccessfulMeasurement()

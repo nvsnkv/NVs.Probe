@@ -11,8 +11,8 @@ namespace NVs.Probe.Mqtt
 
         Task Notify(SuccessfulMeasurement measurement, CancellationToken ct);
 
-        Task Start(CancellationToken ct);
+        Task Startup(CancellationToken ct);
 
-        Task Stop(CancellationToken ct);
+        Task Teardown(CancellationToken ct);
     }
 }

@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Client;
-using MQTTnet.Client.Disconnecting;
-using MQTTnet.Client.Options;
 using NVs.Probe.Logging;
 using NVs.Probe.Measuring;
 using NVs.Probe.Metrics;
@@ -17,16 +14,17 @@ namespace NVs.Probe.Mqtt
 {
     internal class MqttAdapter : IMqttAdapter, IDisposable
     {
-        private readonly CancellationTokenSource internalCancellationTokenSource = new CancellationTokenSource();
-        private readonly IMqttClientOptions options;
+        private readonly CancellationTokenSource internalCancellationTokenSource = new();
+        private readonly MqttClientOptions options;
         private readonly RetryOptions retryOptions;
         private readonly IMqttAnnounceBuilder announceBuilder;
         private readonly ILogger<MqttAdapter> logger;
         private readonly IMqttClient client;
 
-        private uint retriesCount = 0;
+        private uint retriesCount;
+        private volatile int isReconnecting;
 
-        public MqttAdapter(IMqttClientOptions options, IMqttClientFactory factory, RetryOptions retryOptions, IMqttAnnounceBuilder announceBuilder, ILogger<MqttAdapter> logger)
+        public MqttAdapter(MqttClientOptions options, MqttFactory factory, RetryOptions retryOptions, IMqttAnnounceBuilder announceBuilder, ILogger<MqttAdapter> logger)
         {
             if (factory == null) throw new ArgumentNullException(nameof(factory));
             this.options = options ?? throw new ArgumentNullException(nameof(options));
@@ -34,55 +32,6 @@ namespace NVs.Probe.Mqtt
             this.announceBuilder = announceBuilder ?? throw new ArgumentNullException(nameof(announceBuilder));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             client = factory.CreateMqttClient();
-            client.UseDisconnectedHandler(HandleClientDisconnected);
-        }
-
-        private async Task HandleClientDisconnected(MqttClientDisconnectedEventArgs arg)
-        {
-            if (internalCancellationTokenSource.IsCancellationRequested)
-            {
-                logger.LogWarning("Attempted to handle disconnect on disposed adapter!");
-                return;
-            }
-
-            if (arg.Exception != null)
-            {
-                logger.LogError(arg.Exception, "Client got disconnected from the server due to following reason: {@reason}", arg.Reason);
-            }
-            else
-            {
-                logger.LogInformation("Client got disconnected from the server due to following reason: {@reason}", arg.Reason);
-            }
-
-            
-            if (retryOptions.ShouldRetry)
-            {
-                retriesCount++;
-                if (retriesCount < retryOptions.RetriesCount)
-                {
-                    var delay = retryOptions.Interval * retriesCount;
-                    logger.LogInformation($"Attempting to reconnect in {delay} ({retriesCount} out of {retryOptions.RetriesCount})");
-                    await Task.Delay(delay, internalCancellationTokenSource.Token);
-
-                    try
-                    {
-                        await Connect(internalCancellationTokenSource.Token);
-                        retriesCount = 0;
-                    }
-                    catch (Exception e)
-                    {
-                        logger.LogError(e, "Failed to reconnect!");
-                    }
-                }
-                else
-                {
-                    logger.LogError("Maximum retry attempts count reached, connection won't be restored automatically!");
-                }
-            }
-            else
-            {
-                logger.LogWarning("Retry is not configured, connection won't be restored automatically!");
-            }
         }
 
         public async Task Announce(IEnumerable<MetricConfig> configs, CancellationToken ct)
@@ -105,7 +54,7 @@ namespace NVs.Probe.Mqtt
                 {
                     using (logger.BeginScope("Topic {@Topic}", message.Topic))
                     {
-                        logger.LogDebug($"Sending message {i++} out of {messages.Count}");
+                        logger.LogDebug("Sending message {i} out of {messagesCount}", i++, messages.Count);
                         await client.PublishAsync(message, ct);
                         logger.LogDebug("Message sent!");
 
@@ -121,7 +70,7 @@ namespace NVs.Probe.Mqtt
 
             logger.LogInformation("Announcement completed!");
         }
-        
+
         public async Task Notify(SuccessfulMeasurement measurement, CancellationToken ct)
         {
             if (measurement == null) throw new ArgumentNullException(nameof(measurement));
@@ -153,7 +102,7 @@ namespace NVs.Probe.Mqtt
             }
         }
 
-        public async Task Start(CancellationToken ct)
+        public async Task Startup(CancellationToken ct)
         {
             if (internalCancellationTokenSource.IsCancellationRequested)
             {
@@ -169,6 +118,7 @@ namespace NVs.Probe.Mqtt
 
             try
             {
+                client.DisconnectedAsync += OnClientDisconnected;
                 await Connect(ct);
             }
             catch (Exception e)
@@ -178,6 +128,64 @@ namespace NVs.Probe.Mqtt
             }
 
             logger.LogInformation("Adapter started.");
+        }
+
+        private async Task OnClientDisconnected(MqttClientDisconnectedEventArgs arg)
+        {
+            using (logger.BeginScope("Reconnect"))
+            {
+                logger.LogWarning("Client got disconnected!");
+
+                if (!retryOptions.ShouldRetry)
+                {
+                    logger.LogError("No retries configured! Application cannot proceed!");
+                    throw new Exception("Client was disconnected and no retries were configured!");
+                }
+
+                if (Interlocked.CompareExchange(ref isReconnecting, 1, 0) != 0)
+                {
+                    logger.LogWarning("Connection recovery is already in progress, this task will be ended!");
+                    return;
+                }
+
+                retriesCount = 0;
+
+                try
+                {
+                    while (retriesCount < retryOptions.RetriesCount && !client.IsConnected)
+                    {
+                        var delay = retryOptions.Interval * (retriesCount + 1);
+                        logger.LogInformation("Attempt: {attempt} of {retriesCount}, Delay: {delay}", retriesCount, retryOptions.RetriesCount, delay);
+                        await Task.Delay(delay, internalCancellationTokenSource.Token);
+                        internalCancellationTokenSource.Token.ThrowIfCancellationRequested();
+
+                        try
+                        {
+                            await Connect(internalCancellationTokenSource.Token);
+                            logger.LogInformation("Connection was restored!");
+                        }
+                        catch (Exception e)
+                        {
+                            logger.LogError(e, "Error occurred during reconnection!");
+                            retriesCount++;
+                        }
+                    }
+
+                    if (!client.IsConnected)
+                    {
+                        logger.LogError("Unable to reconnect - all attempts were not successful!");
+                        throw new Exception("Failed to reconnect to client!");
+                    }
+                    else
+                    {
+                        logger.LogInformation("Connection restored!");
+                    }
+                }
+                finally
+                {
+                    isReconnecting = 0;
+                }
+            }
         }
 
         private async Task Connect(CancellationToken ct)
@@ -195,7 +203,7 @@ namespace NVs.Probe.Mqtt
             }
         }
 
-        public async Task Stop(CancellationToken ct)
+        public async Task Teardown(CancellationToken ct)
         {
             if (internalCancellationTokenSource.IsCancellationRequested)
             {
@@ -205,7 +213,12 @@ namespace NVs.Probe.Mqtt
             logger.LogDebug("Stopping adapter... ");
             try
             {
-                await client.DisconnectAsync(ct);
+                client.DisconnectedAsync -= OnClientDisconnected;
+                var disconnectOptions = new MqttClientDisconnectOptionsBuilder()
+                    .WithReason(MqttClientDisconnectReason.NormalDisconnection)
+                    .Build();
+
+                await client.DisconnectAsync(disconnectOptions, ct);
                 logger.LogInformation("Adapter stopped.");
             }
             catch (Exception e)
@@ -223,9 +236,10 @@ namespace NVs.Probe.Mqtt
                 logger.LogWarning("Dispose requested for already disposed object!");
                 return;
             }
-
+            
             internalCancellationTokenSource.Cancel();
-            client.UseDisconnectedHandler((IMqttClientDisconnectedHandler)null);
+
+            client.DisconnectedAsync -= OnClientDisconnected;
             client?.Dispose();
             logger.LogInformation("Disposed.");
         }

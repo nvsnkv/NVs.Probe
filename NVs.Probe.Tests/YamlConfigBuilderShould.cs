@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 using FluentAssertions;
-using MQTTnet.Client.Options;
+using MQTTnet.Client;
 using NVs.Probe.Configuration;
 using Xunit;
 
@@ -44,8 +44,8 @@ namespace NVs.Probe.Tests
             var options = new YamlConfigBuilder().Build("probe.settings.yaml").MqttOptions;
 
             options.ClientOptions.ClientId.Should().BeEquivalentTo(clientId);
-            options.ClientOptions.Credentials.Username.Should().BeEquivalentTo(user);
-            options.ClientOptions.Credentials.Password.Should().BeEquivalentTo(Encoding.UTF8.GetBytes(pwd));
+            options.ClientOptions.Credentials.GetUserName(options.ClientOptions).Should().BeEquivalentTo(user);
+            options.ClientOptions.Credentials.GetPassword(options.ClientOptions).Should().BeEquivalentTo(Encoding.UTF8.GetBytes(pwd));
             options.ClientOptions.ChannelOptions.Should().BeOfType<MqttClientTcpOptions>();
             ((MqttClientTcpOptions)options.ClientOptions.ChannelOptions).Server.Should().BeEquivalentTo(broker);
             ((MqttClientTcpOptions)options.ClientOptions.ChannelOptions).Port.Should().BeNull();

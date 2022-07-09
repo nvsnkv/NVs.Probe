@@ -50,7 +50,7 @@ namespace NVs.Probe.Configuration
             return new RunnerOptions(shell, flags, timeout);
         }
 
-        public void WriteYaml(IEmitter emitter, object? value, Type type)
+        public void WriteYaml(IEmitter emitter, object value, Type type)
         {
             throw new NotImplementedException();
         }
