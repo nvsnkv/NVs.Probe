@@ -17,7 +17,7 @@ namespace NVs.Probe.Mqtt
 {
     internal class MqttAdapter : IMqttAdapter, IDisposable
     {
-        private readonly CancellationTokenSource internalCancellationTokenSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource internalCancellationTokenSource = new();
         private readonly IMqttClientOptions options;
         private readonly RetryOptions retryOptions;
         private readonly IMqttAnnounceBuilder announceBuilder;
