@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>probe</AssemblyName>
-    <Version>0.4.0</Version>
+    <Version>0.5.0</Version>
     <Copyright>(c) nvsnkv 2021</Copyright>
     <Authors>nvsnkv</Authors>
     <Description>Probe is cross-platform application that simplifies metrics collection and publishing. Designed to capture various system stats that can be captured via CLI and publish them to MQTT broker.</Description>
