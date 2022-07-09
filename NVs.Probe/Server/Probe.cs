@@ -23,8 +23,8 @@ namespace NVs.Probe.Server
         public Probe(ProbeOptions options, IMeter meter, IMqttAdapter adapter, ILogger<Probe> logger)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
-            this.metrics = options.Metrics;
-            this.delay = options.InterSeriesDelay;
+            metrics = options.Metrics;
+            delay = options.InterSeriesDelay;
             this.meter = meter ?? throw new ArgumentNullException(nameof(meter));
             this.adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -35,7 +35,7 @@ namespace NVs.Probe.Server
             logger.LogDebug("Starting service... ");
             try
             {
-                await adapter.Start(cancellationToken);
+                await adapter.Startup(cancellationToken);
                 await adapter.Announce(metrics, cancellationToken);
 
                 source = new CancellationTokenSource();
@@ -57,14 +57,14 @@ namespace NVs.Probe.Server
                                     switch (result)
                                     {
                                         case null:
-                                            throw new ArgumentNullException(nameof(result));
+                                            throw new InvalidOperationException("Received null result!");
 
                                         case SuccessfulMeasurement successful:
                                             await adapter.Notify(successful, source.Token);
                                             break;
 
                                         case FailedMeasurement failure:
-                                            logger.LogError(failure.Exception, $"Failed to measure {failure.Metric.Topic}");
+                                            logger.LogError(failure.Exception, "Failed to measure {topic}", failure.Metric.Topic);
                                             break;
 
                                         default:
@@ -101,7 +101,7 @@ namespace NVs.Probe.Server
             {
                 source.Cancel();
                 source.Dispose();
-                await adapter.Stop(cancellationToken);
+                await adapter.Teardown(cancellationToken);
             }
             catch (Exception e)
             {

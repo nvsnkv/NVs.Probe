@@ -11,7 +11,7 @@ namespace NVs.Probe.Tests
 {
     public sealed class ShellCommandRunnerShould
     {
-        private readonly Mock<ILogger<ShellCommandRunner>> logger = new Mock<ILogger<ShellCommandRunner>>();
+        private readonly Mock<ILogger<ShellCommandRunner>> logger = new();
 
         [Fact, Trait("Category", "Windows")]
         public async Task InvokeWindowsCommandsWithPipingSupport()

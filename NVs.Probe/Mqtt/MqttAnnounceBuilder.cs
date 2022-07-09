@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using MQTTnet;
-using MQTTnet.Client.Options;
+using MQTTnet.Client;
 using Newtonsoft.Json;
 using NVs.Probe.Logging;
 using NVs.Probe.Metrics;
@@ -22,7 +22,7 @@ namespace NVs.Probe.Mqtt
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public IEnumerable<MqttApplicationMessage> BuildAnnounceMessages(IEnumerable<MetricConfig> configs, IMqttClientOptions options)
+        public IEnumerable<MqttApplicationMessage> BuildAnnounceMessages(IEnumerable<MetricConfig> configs, MqttClientOptions options)
         {
             if (configs == null) throw new ArgumentNullException(nameof(configs));
             if (options == null) throw new ArgumentNullException(nameof(options));
@@ -42,7 +42,7 @@ namespace NVs.Probe.Mqtt
             return configs.Select(c => CreateAnnouncement(c, device, options));
         }
 
-        private MqttApplicationMessage CreateAnnouncement(MetricConfig config, object device, IMqttClientOptions options)
+        private MqttApplicationMessage CreateAnnouncement(MetricConfig config, object device, MqttClientOptions options)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             if (options == null) throw new ArgumentNullException(nameof(options));

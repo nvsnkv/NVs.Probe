@@ -1,5 +1,5 @@
 ﻿using System;
-using MQTTnet.Client.Options;
+using MQTTnet.Client;
 using NVs.Probe.Mqtt;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;

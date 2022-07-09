@@ -12,7 +12,7 @@ namespace NVs.Probe.Server.Shutdown
         private readonly string name;
         private readonly ILogger<ShutdownRequestListener> logger;
         private readonly Task listener;
-        private readonly CancellationTokenSource cts = new CancellationTokenSource();
+        private readonly CancellationTokenSource cts = new();
 
         public ShutdownRequestListener(string name, ILogger<ShutdownRequestListener> logger)
         {
