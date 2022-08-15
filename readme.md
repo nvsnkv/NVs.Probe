@@ -1,5 +1,5 @@
-![.NET](https://github.com/nvsnkv/NVs.Probe/actions/workflows/dotnet.yml/badge.svg)
 # Probe
+![.NET](https://github.com/nvsnkv/NVs.Probe/actions/workflows/dotnet.yml/badge.svg)
 Probe is cross-platform application that simplifies metrics collection and publishing. 
 * No custom metrics format - Probe is designed to use CLI to gather metrics. From one stand point it's not as easy as tell "Gather CPU load", but from other hand it allows you to gather any stats you can get from command line!
 * No custom telemetry protocol - Probe uses MQTT to publish measurement results. That allows you to connect Probe with you smart home infrastructure and setup as complex monitoring and automation as you wish.
