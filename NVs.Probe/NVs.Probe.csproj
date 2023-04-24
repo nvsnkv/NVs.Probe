@@ -24,7 +24,7 @@
     <PackageReference Include="Colorful.Console" Version="1.2.15" />
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
-    <PackageReference Include="MQTTnet" Version="4.1.4.563" />
+    <PackageReference Include="MQTTnet" Version="4.2.0.706" />
     <PackageReference Include="NetEscapades.Configuration.Yaml" Version="3.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="5.0.1" />
